@@ -1,10 +1,32 @@
 import {test,expect} from '@playwright/test';
 test.setTimeout(150000);
 async function destination(page,id,name){await page.locator('#mapButton').click();await page.locator(`[data-destination="${id}"]`).click();if(name)await expect(page.locator('#nearName')).toHaveText(name);await expect(page.locator('#interactButton')).toBeVisible();}
-async function enter(page){await page.goto('/');await expect(page.locator('#gameLoading')).toHaveCount(0);await destination(page,'entrance','박물관 입장');await page.keyboard.press('f');await page.locator('#enterGame').click();await expect(page.locator('#locationName')).toContainText('제작 공방');}
-async function workshops(page){const names=['흙 준비하기','모양 빚기','무늬 꾸미기','말리고 초벌굽기','유약 바르기','가마에서 완성하기'];for(let i=0;i<6;i++){await destination(page,`making-${i}`,names[i]);await page.keyboard.press('f');await expect(page.locator('#makingName')).toHaveText(names[i]);await page.locator('#makingComplete').click();await expect(page.locator('#makingProgress')).toHaveText(`제작 공방 ${i+1}/6`);}}
-test('full-screen world: enter, visit workbenches, observe five objects, make a report, exit and hang it in the yard',async({page})=>{
- const errors=[];page.on('pageerror',e=>errors.push(e.message));await enter(page);await workshops(page);
+async function mockYouTubePlayback(page){
+ await page.addInitScript(()=>{
+  window.YT={Player:class {
+   constructor(mount,options){this.options=options;this.mount=mount;this.started=0;this.ended=false;this.timer=null;window.__museumTestPlayer=this;queueMicrotask(()=>options.events.onReady({target:this}));}
+   getDuration(){return 1;}
+   getCurrentTime(){return this.ended?1:this.started?Math.min(1,(performance.now()-this.started)/1000):0;}
+   getPlaybackRate(){return 1;}
+   getIframe(){return this.mount;}
+   playVideo(){this.started=performance.now();this.ended=false;this.options.events.onStateChange({data:1});this.timer=setTimeout(()=>{this.ended=true;this.options.events.onStateChange({data:0});},1100);}
+   destroy(){clearTimeout(this.timer);}
+  }};
+ });
+}
+async function enter(page){
+ await mockYouTubePlayback(page);await page.goto('/');
+ await expect(page.locator('#profileDialog')).toBeVisible();await page.locator('#profileNickname').fill('연꽃탐험가');await page.locator('#profileEnter').click();
+ await expect(page.locator('#gameLoading')).toHaveCount(0);await destination(page,'entrance','박물관 입장');await page.keyboard.press('f');await page.locator('#enterGame').click();await expect(page.locator('#locationName')).toContainText('영상관');
+}
+async function watchVideo(page){
+ await destination(page,'video','고려청자 제작 영상');await page.keyboard.press('f');
+ await expect(page.locator('#videoDialog')).toBeVisible();await expect(page.locator('.video-lesson')).toHaveAttribute('data-state','ready');await expect(page.locator('#continueToCollection')).toBeDisabled();
+ await page.evaluate(()=>window.__museumTestPlayer.playVideo());
+ await expect(page.locator('#continueToCollection')).toBeEnabled();await expect(page.locator('#makingProgress')).toHaveText('제작 영상 ✓');await page.locator('#continueToCollection').click();
+}
+test('full-screen world: enter, watch the lesson video, observe five objects, make a report, exit and hang it in the yard',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await enter(page);await watchVideo(page);
  const names={maebyeong:'청자 매병',ewer:'청자 주전자',pillow:'청자 베개',stool:'청자 의자',incense:'청자 투각 칠보무늬 향로'};
  for(const id of Object.keys(names)){await destination(page,id,names[id]);await page.keyboard.press('f');await expect(page.locator('#observationDialog')).toBeVisible();await expect(page.locator('#takePhoto')).toBeEnabled();if(id!=='incense')await page.locator('#observationDialog [data-close]').first().click();}
  await expect(page.locator('#modelSource')).toContainText('실제 스캔 형상');await page.locator('#referenceColor').uncheck();await expect(page.locator('#modelSource')).toContainText('원본 색상');await page.locator('#referenceColor').check();
@@ -14,9 +36,9 @@ test('full-screen world: enter, visit workbenches, observe five objects, make a 
  await page.locator('#guideButton').click();await expect(page.locator('#nearName')).toHaveText('구멍 사이로 피어나는 향',{timeout:20000});await page.screenshot({path:'/workspace/game-exhibition.png'});await page.keyboard.press('f');await expect(page.locator('#readContent')).toContainText('정교하게');await page.screenshot({path:'/workspace/game-shared-report.png'});expect(errors).toEqual([]);
 });
 test('world movement, location and notes restore after reload without a website layout',async({page})=>{
- await enter(page);await workshops(page);await destination(page,'incense','청자 투각 칠보무늬 향로');await page.keyboard.press('f');await expect(page.locator('#takePhoto')).toBeEnabled();await page.locator('#takePhoto').click();await page.locator('#observationNote').fill('구멍이 이어진 향로');await expect(page.locator('#noteStatus')).toContainText('저장했어요');await page.locator('#observationDialog [data-close]').first().click();await page.reload();await expect(page.locator('#gameLoading')).toHaveCount(0);await expect(page.locator('#nearName')).toHaveText('청자 투각 칠보무늬 향로');await page.keyboard.press('f');await expect(page.locator('#observationNote')).toHaveValue('구멍이 이어진 향로');await expect(page.locator('#photoTray img')).toHaveCount(1);await page.locator('#observationDialog [data-close]').first().click();
+ await enter(page);await watchVideo(page);await destination(page,'incense','청자 투각 칠보무늬 향로');await page.keyboard.press('f');await expect(page.locator('#takePhoto')).toBeEnabled();await page.locator('#takePhoto').click();await page.locator('#observationNote').fill('구멍이 이어진 향로');await expect(page.locator('#noteStatus')).toContainText('저장했어요');await page.locator('#observationDialog [data-close]').first().click();await page.reload();await expect(page.locator('#gameLoading')).toHaveCount(0);await expect(page.locator('#nearName')).toHaveText('청자 투각 칠보무늬 향로');await page.keyboard.press('f');await expect(page.locator('#observationNote')).toHaveValue('구멍이 이어진 향로');await expect(page.locator('#photoTray img')).toHaveCount(1);await page.locator('#observationDialog [data-close]').first().click();
  await page.keyboard.down('ArrowDown');await page.waitForTimeout(700);await page.keyboard.up('ArrowDown');expect(await page.evaluate(()=>document.documentElement.scrollHeight===innerHeight)).toBeTruthy();await page.screenshot({path:'/workspace/game-collection.png'});
 });
 test('mobile game fills the viewport and supports touch controls and interaction',async({page})=>{
- await page.setViewportSize({width:390,height:844});await page.goto('/');await expect(page.locator('#gameLoading')).toHaveCount(0);await expect(page.locator('.touch-pad')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth===innerWidth&&document.documentElement.scrollHeight===innerHeight)).toBeTruthy();await destination(page,'entrance','박물관 입장');await page.locator('#interactButton').click();await page.locator('#enterGame').click();await page.screenshot({path:'/workspace/game-mobile.png'});await destination(page,'making-2','무늬 꾸미기');await page.locator('#interactButton').click();await page.locator('[data-technique="pierce"]').click();await expect(page.locator('#techniqueDescription')).toContainText('뚫어');
+ await page.setViewportSize({width:390,height:844});await mockYouTubePlayback(page);await page.goto('/');await expect(page.locator('#profileDialog')).toBeVisible();await page.locator('#profileNickname').fill('청자탐험가');await page.locator('#profileEnter').click();await expect(page.locator('#gameLoading')).toHaveCount(0);await expect(page.locator('.touch-pad')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth===innerWidth&&document.documentElement.scrollHeight===innerHeight)).toBeTruthy();await destination(page,'entrance','박물관 입장');await page.locator('#interactButton').click();await page.locator('#enterGame').click();await page.screenshot({path:'/workspace/game-mobile.png'});await destination(page,'video','고려청자 제작 영상');await page.locator('#interactButton').click();await expect(page.locator('.video-lesson')).toHaveAttribute('data-state','ready');await page.evaluate(()=>window.__museumTestPlayer.playVideo());await expect(page.locator('#continueToCollection')).toBeEnabled();
 });

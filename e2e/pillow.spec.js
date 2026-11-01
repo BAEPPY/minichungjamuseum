@@ -7,7 +7,7 @@ test('pillow SWF photos: change photographed angle, zoom, capture, insert report
  await page.goto('/favicon.svg');
  await page.evaluate(async()=>{
   const storage=await import('/src/storage.js');
-  await storage.put({id:'game-progress',making:[0,1,2,3,4,5],visited:[],inside:true,exited:false,position:{x:8,z:-1.7,inside:true},avatarName:'베개 탐험가',avatarColor:'#eccd79'});
+  await storage.put({id:'game-progress',making:[0,1,2,3,4,5],visited:[],inside:true,exited:false,profileReady:true,avatarHair:'short',videoCompleted:true,videoId:'YM7FhGcR_5E',position:{x:8,z:-1.7,inside:true},avatarName:'베개 탐험가',avatarColor:'#eccd79'});
  });
  await page.goto('/');
  await expect(page.locator('#gameLoading')).toHaveCount(0);

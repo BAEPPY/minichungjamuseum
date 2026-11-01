@@ -1,0 +1,24 @@
+# 등각 박물관 이미지 자산
+
+이 폴더의 PNG 14개는 이번 박물관을 위해 이미지 생성 도구로 각각 제작했습니다. 제공받은 ZEP 화면은 공간 배치와 등각 시점의 참고 자료이며, 해당 화면을 잘라 자산으로 사용하지 않았습니다.
+
+| 파일 | 역할 |
+| --- | --- |
+| `museum-building.png` | 기와지붕 박물관 건물 |
+| `museum-gate.png` | 입장 마당의 문 |
+| `stone-tile.png` | 야외 돌바닥 |
+| `wood-tile.png` | 실내 나무바닥 |
+| `gallery-wall.png` | 실내 전시실 벽 |
+| `props/display-case.png` | 유물 유리 진열장 |
+| `props/tree.png` | 청자 화분의 나무 |
+| `props/flower-planter.png` | 화단 |
+| `props/bench.png` | 벤치 |
+| `props/video-screen.png` | 제작 영상 스크린 |
+| `props/writing-desk.png` | 보고서 책상 |
+| `props/report-frame.png` | 학생 보고서 전시판 |
+| `sprites/avatar-short.png` | 짧은 머리 아바타 동작 시트 |
+| `sprites/avatar-bob.png` | 단발머리 아바타 동작 시트 |
+
+아바타 시트는 4열 × 3행이며 앞·뒤·옆 방향과 걷기 프레임을 포함합니다. 프로그램에서 각 셀의 투명 여백을 정리하고, 탐험복 부분만 크림·초록·보라 3색으로 표시합니다. 생성된 원본 PNG는 보존합니다.
+
+전시물은 이 그림들로 대신하지 않습니다. 진열장 안의 매병·향로는 제공 3D 모델의 미리보기, 베개는 제공 자료에서 추출한 사진을 사용합니다. 주전자와 의자만 체험용 예시 모델입니다. 게시한 보고서의 실제 사진을 전시판 안에 표시합니다.

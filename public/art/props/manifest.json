@@ -1,0 +1,90 @@
+{
+  "style": "original isometric pixel art, cream/navy/celadon/wood",
+  "generated": true,
+  "sprites": {
+    "bench": {
+      "file": "bench.png",
+      "width": 1774,
+      "height": 887,
+      "bounds": [
+        330,
+        86,
+        1445,
+        831
+      ],
+      "transparent": true
+    },
+    "display-case": {
+      "file": "display-case.png",
+      "width": 1536,
+      "height": 1024,
+      "bounds": [
+        167,
+        18,
+        1380,
+        1024
+      ],
+      "transparent": true
+    },
+    "flower-planter": {
+      "file": "flower-planter.png",
+      "width": 1536,
+      "height": 1024,
+      "bounds": [
+        155,
+        141,
+        1386,
+        952
+      ],
+      "transparent": true
+    },
+    "report-frame": {
+      "file": "report-frame.png",
+      "width": 1274,
+      "height": 1235,
+      "bounds": [
+        376,
+        34,
+        910,
+        1192
+      ],
+      "transparent": true
+    },
+    "tree": {
+      "file": "tree.png",
+      "width": 1266,
+      "height": 1243,
+      "bounds": [
+        71,
+        19,
+        1224,
+        1221
+      ],
+      "transparent": true
+    },
+    "video-screen": {
+      "file": "video-screen.png",
+      "width": 1536,
+      "height": 1024,
+      "bounds": [
+        312,
+        7,
+        1227,
+        1024
+      ],
+      "transparent": true
+    },
+    "writing-desk": {
+      "file": "writing-desk.png",
+      "width": 1536,
+      "height": 1024,
+      "bounds": [
+        229,
+        60,
+        1295,
+        983
+      ],
+      "transparent": true
+    }
+  }
+}

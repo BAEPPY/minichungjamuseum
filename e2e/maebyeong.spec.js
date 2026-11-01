@@ -2,6 +2,14 @@ import {test,expect} from '@playwright/test';
 
 test.setTimeout(120000);
 
+test.beforeEach(async({page})=>{
+ await page.goto('/favicon.svg');
+ await page.evaluate(async()=>{
+  const {put}=await import('/src/storage.js');
+  await put({id:'game-progress',making:[0,1,2,3,4,5],visited:[],inside:true,exited:false,profileReady:true,avatarHair:'short',videoCompleted:true,videoId:'YM7FhGcR_5E',avatarName:'매병 탐험가',avatarColor:'#e8cf91',position:{x:4,z:2.8,inside:true}});
+ });
+});
+
 async function loadMaebyeongRoom(page){
  await page.goto('/');
  await expect(page.locator('#gameLoading')).toHaveCount(0);
@@ -12,6 +20,7 @@ async function loadMaebyeongRoom(page){
   await put({
    id:'game-progress',
    making:[0,1,2,3,4,5],visited:[],inside:true,exited:false,
+   profileReady:true,avatarHair:'short',videoCompleted:true,videoId:'YM7FhGcR_5E',
    position:{x:4,z:2.8,inside:true},
    avatarName:'매병 탐험가',avatarColor:'#eccd79'
   });
