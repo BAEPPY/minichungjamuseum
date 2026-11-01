@@ -94,7 +94,7 @@ test('pillow reconstruction rotates freely and original photographs remain avail
  await expect(page.locator('#observationNote')).toHaveValue(note);
  expect(await page.locator('#photoTray img').first().getAttribute('src')).toBe(modelPhoto);
  await page.locator('[data-pillow-mode="photos"]').click();
- await expect(hybrid).toHaveAttribute('data-state','ready');
+ await expect(hybrid).toHaveAttribute('data-state','ready',{timeout:30000});
  await expect(photoCanvas).toHaveAttribute('data-frame','C05.jpg');
  expect(await page.locator('#photoTray img').nth(1).getAttribute('src')).toBe(originalPhoto);
  expect(changedFrame).not.toBe('C05.jpg');

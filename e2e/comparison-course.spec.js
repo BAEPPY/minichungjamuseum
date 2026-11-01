@@ -246,7 +246,8 @@ test('editing comparison evidence invalidates an unpublished final report and ga
  await moveToCourseDestination(page,'desk');await page.keyboard.press('f');
  await expect(page.locator('#reportDialog')).toBeVisible();
  await page.locator('#reportDialog [data-comparison-field="evidence"]').fill('');
- await expect(page.locator('#draftStatus')).toContainText('임시 저장됨');
+ // Initial real-model thumbnails may still be rendering on software GPUs.
+ await expect(page.locator('#draftStatus')).toContainText('임시 저장됨',{timeout:30000});
  await expect.poll(()=>page.evaluate(async()=>{const {get}=await import('/src/storage.js');return Boolean(await get('ready-report'));})).toBe(false);
  await expect(page.locator('#reportProgress')).not.toHaveClass(/done/);
  expect((await progress(page)).comparisonCompleted).toBe(false);

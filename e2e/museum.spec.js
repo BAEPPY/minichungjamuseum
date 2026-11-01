@@ -247,7 +247,7 @@ test('STORED-RECORD plumbing fixture combines eight notes and toy JPEGs into one
  const toyPhotos=await page.evaluate(async({thought,reason,title})=>{
   const {get,put}=await import('/src/storage.js');
   const colors=['#c34942','#436cb8','#4b8e65','#d2ad39'];
-  const photos=colors.map(color=>{const canvas=document.createElement('canvas');canvas.width=12;canvas.height=12;const ctx=canvas.getContext('2d');ctx.fillStyle=color;ctx.fillRect(0,0,12,12);return canvas.toDataURL('image/jpeg',.8);});
+  const photos=colors.map(color=>{const canvas=document.createElementNS('http://www.w3.org/1999/xhtml','canvas');canvas.width=12;canvas.height=12;const ctx=canvas.getContext('2d');ctx.fillStyle=color;ctx.fillRect(0,0,12,12);return canvas.toDataURL('image/jpeg',.8);});
   const notebook=await get('notebook');
   for(const [index,id] of ['compare-peony','compare-yuan','compare-inlay','incense'].entries())notebook.entries[id].photos=[photos[index]];
   await put(notebook);
