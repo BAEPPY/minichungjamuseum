@@ -1,6 +1,17 @@
 import {test,expect} from '@playwright/test';
 test.setTimeout(150000);
 async function destination(page,id,name){await page.locator('#mapButton').click();await page.locator(`[data-destination="${id}"]`).click();if(name)await expect(page.locator('#nearName')).toHaveText(name);await expect(page.locator('#interactButton')).toBeVisible();}
+async function seedNativeFixtures(page){
+ await page.goto('/favicon.svg');
+ await page.evaluate(async()=>{
+  const {put}=await import('/src/storage.js');
+  // This is native-rendering test geometry, not a product replacement model.
+  const response=await fetch('/models/celadon-incense.glb');
+  if(!response.ok)throw new Error('Native model fixture could not be loaded.');
+  const blob=await response.blob();
+  for(const artifactId of ['stool','ewer'])await put({id:'native-model-'+artifactId,type:'native-model',artifactId,blob,fileName:'playwright-native-fixture.glb',size:blob.size});
+ });
+}
 async function mockYouTubePlayback(page){
  await page.addInitScript(()=>{
   window.YT={Player:class {
@@ -15,7 +26,7 @@ async function mockYouTubePlayback(page){
  });
 }
 async function enter(page){
- await mockYouTubePlayback(page);await page.goto('/');
+ await mockYouTubePlayback(page);await seedNativeFixtures(page);await page.goto('/');
  await expect(page.locator('#profileDialog')).toBeVisible();await page.locator('#profileNickname').fill('연꽃탐험가');await page.locator('#profileEnter').click();
  await expect(page.locator('#gameLoading')).toHaveCount(0);await destination(page,'entrance','박물관 입장');await page.keyboard.press('f');await page.locator('#enterGame').click();await expect(page.locator('#locationName')).toContainText('영상관');
 }
@@ -27,8 +38,8 @@ async function watchVideo(page){
 }
 test('full-screen world: enter, watch the lesson video, observe five objects, make a report, exit and hang it in the yard',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await enter(page);await watchVideo(page);
- const names={maebyeong:'청자 매병',ewer:'청자 주전자',pillow:'청자 베개',stool:'청자 의자',incense:'청자 투각 칠보무늬 향로'};
- for(const id of Object.keys(names)){await destination(page,id,names[id]);await page.keyboard.press('f');await expect(page.locator('#observationDialog')).toBeVisible();await expect(page.locator('#takePhoto')).toBeEnabled();if(id!=='incense')await page.locator('#observationDialog [data-close]').first().click();}
+ const names={maebyeong:'청자 상감 운학문 매병',ewer:'청자 어룡형 주전자',pillow:'청자 상감 모란·구름·학무늬 베개',stool:'청자 투각 의자',incense:'청자 투각 칠보문 뚜껑 향로'};
+ for(const id of Object.keys(names)){await destination(page,id,names[id]);await page.keyboard.press('f');await expect(page.locator('#observationDialog')).toBeVisible();await expect(page.locator('#takePhoto')).toBeEnabled();if(['stool','ewer'].includes(id)){await expect(page.locator('#objectCanvas canvas')).toBeVisible();await expect(page.locator('#objectCanvas iframe')).toHaveCount(0);}if(id!=='incense')await page.locator('#observationDialog [data-close]').first().click();}
  await expect(page.locator('#modelSource')).toContainText('실제 스캔 형상');await page.locator('#referenceColor').uncheck();await expect(page.locator('#modelSource')).toContainText('원본 색상');await page.locator('#referenceColor').check();
  await page.locator('#takePhoto').click();await expect(page.locator('#photoTray img')).toHaveCount(1);await page.locator('#observationNote').fill('향로 뚜껑에 여러 개의 구멍이 보인다.');await expect(page.locator('#noteStatus')).toContainText('저장했어요');await page.locator('#chooseForReport').click();
  await expect(page.locator('#reportPhotos img')).toHaveCount(1);await expect(page.locator('[name="features"]')).toHaveValue('향로 뚜껑에 여러 개의 구멍이 보인다.');await page.locator('[name="name"]').fill('연꽃 탐험가');await page.locator('[name="title"]').fill('구멍 사이로 피어나는 향');await page.locator('[name="use"]').fill('향을 피우는 데 썼다.');await page.locator('[name="excellence"]').fill('무늬를 정교하게 뚫어 낸 기술이 뛰어나다.');await page.locator('[name="life"]').fill('향을 피우는 도구도 아름답게 꾸몄을 것 같다.');await page.locator('[name="review"]').check();await page.locator('#reportForm [type="submit"]').click();
@@ -36,7 +47,7 @@ test('full-screen world: enter, watch the lesson video, observe five objects, ma
  await page.locator('#guideButton').click();await expect(page.locator('#nearName')).toHaveText('구멍 사이로 피어나는 향',{timeout:20000});await page.screenshot({path:'/workspace/game-exhibition.png'});await page.keyboard.press('f');await expect(page.locator('#readContent')).toContainText('정교하게');await page.screenshot({path:'/workspace/game-shared-report.png'});expect(errors).toEqual([]);
 });
 test('world movement, location and notes restore after reload without a website layout',async({page})=>{
- await enter(page);await watchVideo(page);await destination(page,'incense','청자 투각 칠보무늬 향로');await page.keyboard.press('f');await expect(page.locator('#takePhoto')).toBeEnabled();await page.locator('#takePhoto').click();await page.locator('#observationNote').fill('구멍이 이어진 향로');await expect(page.locator('#noteStatus')).toContainText('저장했어요');await page.locator('#observationDialog [data-close]').first().click();await page.reload();await expect(page.locator('#gameLoading')).toHaveCount(0);await expect(page.locator('#nearName')).toHaveText('청자 투각 칠보무늬 향로');await page.keyboard.press('f');await expect(page.locator('#observationNote')).toHaveValue('구멍이 이어진 향로');await expect(page.locator('#photoTray img')).toHaveCount(1);await page.locator('#observationDialog [data-close]').first().click();
+ await enter(page);await watchVideo(page);await destination(page,'incense','청자 투각 칠보문 뚜껑 향로');await page.keyboard.press('f');await expect(page.locator('#takePhoto')).toBeEnabled();await page.locator('#takePhoto').click();await page.locator('#observationNote').fill('구멍이 이어진 향로');await expect(page.locator('#noteStatus')).toContainText('저장했어요');await page.locator('#observationDialog [data-close]').first().click();await page.reload();await expect(page.locator('#gameLoading')).toHaveCount(0);await expect(page.locator('#nearName')).toHaveText('청자 투각 칠보문 뚜껑 향로');await page.keyboard.press('f');await expect(page.locator('#observationNote')).toHaveValue('구멍이 이어진 향로');await expect(page.locator('#photoTray img')).toHaveCount(1);await page.locator('#observationDialog [data-close]').first().click();
  await page.keyboard.down('ArrowDown');await page.waitForTimeout(700);await page.keyboard.up('ArrowDown');expect(await page.evaluate(()=>document.documentElement.scrollHeight===innerHeight)).toBeTruthy();await page.screenshot({path:'/workspace/game-collection.png'});
 });
 test('mobile game fills the viewport and supports touch controls and interaction',async({page})=>{

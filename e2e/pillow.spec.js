@@ -7,11 +7,11 @@ test('pillow SWF photos: change photographed angle, zoom, capture, insert report
  await page.goto('/favicon.svg');
  await page.evaluate(async()=>{
   const storage=await import('/src/storage.js');
-  await storage.put({id:'game-progress',making:[0,1,2,3,4,5],visited:[],inside:true,exited:false,profileReady:true,avatarHair:'short',videoCompleted:true,videoId:'YM7FhGcR_5E',position:{x:8,z:-1.7,inside:true},avatarName:'베개 탐험가',avatarColor:'#eccd79'});
+  await storage.put({id:'game-progress',making:[0,1,2,3,4,5],visited:[],inside:true,exited:false,profileReady:true,avatarHair:'short',videoCompleted:true,videoId:'YM7FhGcR_5E',position:{x:4,z:2.8,inside:true},avatarName:'베개 탐험가',avatarColor:'#eccd79'});
  });
  await page.goto('/');
  await expect(page.locator('#gameLoading')).toHaveCount(0);
- await expect(page.locator('#nearName')).toHaveText('청자 베개');
+ await expect(page.locator('#nearName')).toHaveText('청자 상감 모란·구름·학무늬 베개');
  await page.keyboard.press('f');
  await expect(page.locator('#observationDialog')).toBeVisible();
  await expect(page.locator('#takePhoto')).toBeEnabled();

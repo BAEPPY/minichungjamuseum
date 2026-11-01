@@ -8,15 +8,25 @@ import {MAP_CAMERA_DIRECTION} from './projection.js';
 const thumbnails=new Map();
 let queue=Promise.resolve();
 function loadImage(url){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=reject;image.src=url;});}
+async function modelMarker(){
+ const canvas=document.createElement('canvas');canvas.width=160;canvas.height=160;const ctx=canvas.getContext('2d');
+ ctx.strokeStyle='#789c8e';ctx.fillStyle='#edf3e6';ctx.lineWidth=5;
+ const points=[[80,12],[137,40],[137,99],[80,128],[23,99],[23,40]];ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fill();ctx.stroke();
+ ctx.beginPath();ctx.moveTo(23,40);ctx.lineTo(80,69);ctx.lineTo(137,40);ctx.moveTo(80,69);ctx.lineTo(80,128);ctx.stroke();
+ ctx.fillStyle='#355e4e';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.fillText('3D',80,151);return loadImage(canvas.toDataURL('image/png'));
+}
 function footCenter(object,bounds){
  const foot=new THREE.Box3(),vertex=new THREE.Vector3(),threshold=bounds.min.y+(bounds.max.y-bounds.min.y)*.02;
  object.updateWorldMatrix(true,true);
  object.traverse(child=>{const positions=child.isMesh&&child.geometry?.getAttribute('position');if(!positions)return;for(let i=0;i<positions.count;i++){vertex.fromBufferAttribute(positions,i).applyMatrix4(child.matrixWorld);if(vertex.y<=threshold)foot.expandByPoint(vertex);}});
  const center=(foot.isEmpty()?bounds:foot).getCenter(new THREE.Vector3());center.y=bounds.min.y;return center;
 }
-export function artifactSprite(artifact){
- if(thumbnails.has(artifact.id))return thumbnails.get(artifact.id);
- const result=artifact.photoPoster?loadImage(artifact.photoPoster):new Promise((resolve,reject)=>{
+export function artifactSpriteKey(artifact){return `${artifact.id}:${artifact.model||artifact.mapPreview||artifact.photoPoster||(artifact.nativePending?'pending':'example')}`;}
+export function clearArtifactSprite(id){for(const key of thumbnails.keys())if(key.startsWith(id+':'))thumbnails.delete(key);}
+export function artifactSprite(original){
+ const artifact={...original},key=artifactSpriteKey(artifact);
+ if(thumbnails.has(key))return thumbnails.get(key);
+ const result=!artifact.model&&artifact.mapPreview?loadImage(artifact.mapPreview):!artifact.model&&artifact.photoPoster?loadImage(artifact.photoPoster):artifact.nativePending?modelMarker():new Promise((resolve,reject)=>{
   queue=queue.catch(()=>{}).then(async()=>{
    let renderer,object;
    try{
@@ -35,5 +45,5 @@ export function artifactSprite(artifact){
    }catch(error){reject(error);}finally{if(object)disposeModel(object);if(renderer){renderer.dispose();renderer.forceContextLoss();}}
   });
  });
- thumbnails.set(artifact.id,result);return result;
+ thumbnails.set(key,result);return result;
 }

@@ -1,5 +1,5 @@
 import {artifacts} from './artifacts.js';
-import {artifactSprite} from './artifact-sprites.js';
+import {artifactSprite,artifactSpriteKey,clearArtifactSprite} from './artifact-sprites.js';
 import {createSpriteRaster,SPRITE_MARKERS} from './sprite-geometry.js';
 import {TILE_WIDTH as TILE_W,TILE_HEIGHT as TILE_H,projectMap as project} from './projection.js';
 
@@ -37,14 +37,14 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
  }
  const assetPromises=Object.entries(ART).map(([key,url])=>imageAsset(key,url,key==='wall'));
  const ready=Promise.all(assetPromises).then(()=>{if(!destroyed)canvas.dataset.assetsReady=String(Object.keys(ART).every(name=>name==='wall'||images.has(name)));});
- for(const artifact of artifacts)artifactSprite(artifact).then(image=>{if(!destroyed)artifactImages.set(artifact.id,{image,rect:alphaRect(image)});}).catch(()=>{});
+ async function reloadArtifact(id){const artifact=artifacts.find(a=>a.id===id);if(!artifact)return;clearArtifactSprite(id);artifactImages.delete(id);const key=artifactSpriteKey(artifact),image=await artifactSprite(artifact);if(!destroyed&&artifactSpriteKey(artifact)===key)artifactImages.set(id,{image,rect:alphaRect(image)});}
+ for(const artifact of artifacts)reloadArtifact(artifact.id).catch(()=>{});
  const hot=(id,type,label,x,z,extra={})=>{const item={id,type,name:label,position:[x,z],...extra};hotspots.set(id,item);return item;};
  hot('entrance','entrance','박물관 입장',0,7);
  hot('exit','exit','관람을 마치고 나가기',0,3.4);
  hot('video','video','고려청자 제작 영상',-6,-3);
  hot('desk','desk','관람 보고서 작성',0,-12);
  hot('publish','publish','내 보고서 전시하기',10,17);
- hot('online-3d','external','온라인 3D 추가 자료',10,-12);obstacles.push({x:10,z:-12,w:1.1,d:.9});
  artifacts.forEach((artifact,i)=>{const [x,z]=COLLECTION[i];hot(artifact.id,'artifact',artifact.name,x,z,{artifact,index:i});obstacles.push({x,z,w:1.05,d:.95});});
  obstacles.push({x:-6,z:-3,w:1.7,d:1.0},{x:0,z:-12,w:1.6,d:.9},{x:10,z:17,w:1,d:.8});
  const decor=(kind,x,z,w,room,extra={})=>decorations.push({kind,x,z,w,room,...extra});
@@ -178,23 +178,18 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
  function drawArtifact(item){
   const [x,z]=item.position,width=128,geometry=sprite('case',width);shadow(x,z,105,28);if(near?.id===item.id)highlight(item,2.8,1.5);drawSprite('case',x,z,width,{layer:'back'});
   const snapshot=artifactImages.get(item.id);
-  if(snapshot&&geometry&&item.artifact.photoPoster&&geometry.anchors?.photoPanel){const p=screen(x,z),quad=geometry.anchors.photoPanel.map(q=>({x:p.x+q.x*zoom,y:p.y+q.y*zoom}));drawQuadImage(snapshot.image,quad);}
+  if(snapshot&&geometry&&item.artifact.photoPoster&&!item.artifact.mapPreview&&geometry.anchors?.photoPanel){const p=screen(x,z),quad=geometry.anchors.photoPanel.map(q=>({x:p.x+q.x*zoom,y:p.y+q.y*zoom}));drawQuadImage(snapshot.image,quad);}
   else if(snapshot&&geometry){const r=snapshot.rect,base=spritePoint('case',x,z,width,SPRITE_MARKERS.case.modelBase),support=geometry.anchors?.modelBase||geometry.point(...SPRITE_MARKERS.case.modelBase),ceiling=geometry.anchors?.modelCeiling||geometry.point(770,225),floor=geometry.anchors?.innerFloor||SPRITE_MARKERS.case.innerFloor.map(p=>geometry.point(...p));
    const maxHeight=Math.max(1,support.y-ceiling.y-5),maxWidth=Math.min(75,(Math.max(...floor.map(p=>p.x))-Math.min(...floor.map(p=>p.x)))*.72),anchor=snapshot.image.groundAnchor||{x:r.x+r.w/2,y:r.y+r.h},aboveGround=Math.max(1,anchor.y-r.y);
    const scale=Math.min(60/aboveGround,maxHeight/aboveGround,maxWidth/r.w),w=r.w*scale,h=r.h*scale;
    ctx.save();ctx.imageSmoothingEnabled=true;ctx.drawImage(snapshot.image,r.x,r.y,r.w,r.h,base.x-(anchor.x-r.x)*scale*zoom,base.y-(anchor.y-r.y)*scale*zoom,w*zoom,h*zoom);ctx.restore();}
   drawSprite('case',x,z,width,{layer:'front'});
-  plaque(`${item.index+1}. ${item.artifact.name.replace('청자 투각 칠보무늬 향로','칠보무늬 향로')}`,x,z,{offset:-(spriteBottom('case',width)+13),width:150,size:9});
+  plaque(`${item.index+1}. ${item.artifact.shortName||item.artifact.name}`,x,z,{offset:-(spriteBottom('case',width)+13),width:175,size:9});
  }
  function drawVideo(item){
   const [x,z]=item.position,width=170;if(near?.id===item.id)highlight(item,3,1.3);shadow(x,z,130,25);drawSprite('screen',x,z,width);
   if(sprite('screen',width)){const board=spriteQuad('screen',x,z,width,SPRITE_MARKERS.screen.board),points=[[.41,.34],[.41,.66],[.65,.5]].map(([u,v])=>quadPoint(board,u,v));ctx.save();ctx.fillStyle='#fcf6d8';ctx.shadowColor='#193c35';ctx.shadowBlur=4;ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fill();ctx.restore();}
   plaque('청자는 어떻게 만들어질까요?',x,z,{offset:-(spriteBottom('screen',width)+14),width:200,size:10,dark:true});
- }
- function drawExternal(item){
-  const [x,z]=item.position,width=108;if(near?.id===item.id)highlight(item,2.2,1.1);shadow(x,z,95,20);drawSprite('screen',x,z,width);
-  if(sprite('screen',width)){let badge=rasters.get('external-badge');if(!badge){badge=document.createElement('canvas');badge.width=320;badge.height=240;const context=badge.getContext('2d');context.fillStyle='#233641';context.fillRect(0,0,320,240);context.fillStyle='#f4e9b9';context.font='bold 88px sans-serif';context.textAlign='center';context.textBaseline='middle';context.fillText('3D',160,120);rasters.set('external-badge',badge);}drawQuadImage(badge,spriteQuad('screen',x,z,width,SPRITE_MARKERS.screen.board));}
-  plaque('온라인 3D 추가 자료',x,z,{offset:-(spriteBottom('screen',width)+14),width:165,size:9,dark:true});
  }
  function drawDesk(item){const [x,z]=item.position,width=150;if(near?.id===item.id)highlight(item,2.7,1.7);shadow(x,z,110,25);drawSprite('desk',x,z,width);plaque(item.type==='publish'?'내 보고서 걸기':'나의 관람 보고서',x,z,{offset:-(spriteBottom('desk',width)+14),width:165,dark:true});}
  function drawReport(item){
@@ -243,7 +238,7 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
   for(const item of hotspots.values()){
    const outdoor=['entrance','publish','report'].includes(item.type);if(indoors===outdoor)continue;
    if(item.type==='entrance'||item.type==='exit'){portal(item);plaque(item.type==='entrance'?'입장하기 · F':'관람 마치기 · F',...item.position,{offset:item.type==='entrance'?-37:41,width:155,dark:true});continue;}
-   commands.push({depth:item.position[0]+item.position[1],draw:()=>item.type==='artifact'?drawArtifact(item):item.type==='video'?drawVideo(item):item.type==='external'?drawExternal(item):item.type==='report'?drawReport(item):drawDesk(item)});
+   commands.push({depth:item.position[0]+item.position[1],draw:()=>item.type==='artifact'?drawArtifact(item):item.type==='video'?drawVideo(item):item.type==='report'?drawReport(item):drawDesk(item)});
   }
   commands.push({depth:player.x+player.z+.12,draw:drawPlayer});commands.sort((a,b)=>a.depth-b.depth);for(const command of commands)command.draw();
  }
@@ -258,7 +253,7 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
  function clearKeys(){keys={};touch={x:0,y:0};waypoints=[];target={...player};}
  function interact(){if(near&&!paused)onInteract(near);}
  function pointer(event){if(paused)return;const rect=canvas.getBoundingClientRect(),point={x:event.clientX-rect.left,y:event.clientY-rect.top};
-  const definitions={artifact:['case',128],video:['screen',170],external:['screen',108],desk:['desk',150],publish:['desk',150],report:['frame',100]};
+  const definitions={artifact:['case',128],video:['screen',170],desk:['desk',150],publish:['desk',150],report:['frame',100]};
   // Pick the foremost opaque sprite pixel. Its calibrated ground center is
   // still the movement/interaction destination; tall paper and screens click
   // correctly without stealing hits from the next exhibit's empty corners.
@@ -301,5 +296,5 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
   const p=project(player.x,player.z),ease=1-Math.exp(-elapsed*8);camera.x+=(p.x-camera.x)*ease;camera.y+=(p.y-camera.y)*ease;paint();
  }
  tick(last);
- return {ready,moveTo,interact,getPosition:()=>({x:player.x,z:player.z,inside:indoors}),teleport(x,z,isInside){indoors=isInside;player={x,z};target={...player};camera=project(x,z);waypoints=[];clearKeys();lastNear=null;near=null;onNear(null);onMove({x,z,inside:indoors});},pause(value){paused=value;keys={};touch={x:0,y:0};if(value){waypoints=[];target={...player};}},setTouch(x,y){const wasMoving=touch.x||touch.y;touch={x,y};if(wasMoving&&!x&&!y&&!Object.values(keys).some(Boolean)){target={...player};waypoints=[];}},zoom(delta){zoom=clamp(zoom-delta*.1,.58,1.8);},setAvatar(nextColor,nextName,nextHair=hair){color=nextColor;name=nextName||'나의 탐험가';hair=nextHair==='bob'?'bob':'short';},updateReports(nextReports){reports=nextReports.slice(0,6);for(const id of [...hotspots.keys()])if(id.startsWith('report-'))hotspots.delete(id);for(let i=obstacles.length-1;i>=0;i--)if(obstacles[i].report)obstacles.splice(i,1);reports.forEach((report,i)=>{const x=16+(i%3)*4,z=10+Math.floor(i/3)*8,item=hot(`report-${report.id}`,'report',report.title,x,z,{report});obstacles.push({x,z,w:.7,d:.55,room:'outside',report:true});const image=new Image();image.onload=()=>{if(!destroyed){item.poster=image;item.paper=reportPaper(report,image);}};image.src=report.photos[0];});},dispose(){destroyed=true;cancelAnimationFrame(frame);for(const timer of retryTimers)clearTimeout(timer);retryTimers.clear();observer.disconnect();canvas.removeEventListener('click',pointer);window.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);window.removeEventListener('blur',clearKeys);images.clear();artifactImages.clear();spriteFrames.clear();recolored.clear();rasters.clear();spriteRasters.clear();canvas.remove();}};
+ return {ready,moveTo,interact,reloadArtifact,getPosition:()=>({x:player.x,z:player.z,inside:indoors}),teleport(x,z,isInside){indoors=isInside;player={x,z};target={...player};camera=project(x,z);waypoints=[];clearKeys();lastNear=null;near=null;onNear(null);onMove({x,z,inside:indoors});},pause(value){paused=value;keys={};touch={x:0,y:0};if(value){waypoints=[];target={...player};}},setTouch(x,y){const wasMoving=touch.x||touch.y;touch={x,y};if(wasMoving&&!x&&!y&&!Object.values(keys).some(Boolean)){target={...player};waypoints=[];}},zoom(delta){zoom=clamp(zoom-delta*.1,.58,1.8);},setAvatar(nextColor,nextName,nextHair=hair){color=nextColor;name=nextName||'나의 탐험가';hair=nextHair==='bob'?'bob':'short';},updateReports(nextReports){reports=nextReports.slice(0,6);for(const id of [...hotspots.keys()])if(id.startsWith('report-'))hotspots.delete(id);for(let i=obstacles.length-1;i>=0;i--)if(obstacles[i].report)obstacles.splice(i,1);reports.forEach((report,i)=>{const x=16+(i%3)*4,z=10+Math.floor(i/3)*8,item=hot(`report-${report.id}`,'report',report.title,x,z,{report});obstacles.push({x,z,w:.7,d:.55,room:'outside',report:true});const image=new Image();image.onload=()=>{if(!destroyed){item.poster=image;item.paper=reportPaper(report,image);}};image.src=report.photos[0];});},dispose(){destroyed=true;cancelAnimationFrame(frame);for(const timer of retryTimers)clearTimeout(timer);retryTimers.clear();observer.disconnect();canvas.removeEventListener('click',pointer);window.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);window.removeEventListener('blur',clearKeys);images.clear();artifactImages.clear();spriteFrames.clear();recolored.clear();rasters.clear();spriteRasters.clear();canvas.remove();}};
 }

@@ -4,6 +4,11 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 // Cache the decoded source. Each instance owns its geometry, materials and texture
 // wrappers; disposing a viewer must not invalidate another instance's textures.
 const sources=new Map();
+export function releaseModelSource(path){
+ if(!path?.startsWith('blob:'))return;
+ const source=sources.get(path);sources.delete(path);
+ source?.then(gltf=>disposeModel(gltf.scene)).catch(()=>{});
+}
 export function disposeModel(object){
  const geometries=new Set(),materials=new Set(),textures=new Set();
  object.traverse(node=>{if(node.geometry)geometries.add(node.geometry);for(const material of [].concat(node.material||[])){materials.add(material);for(const value of Object.values(material))if(value?.isTexture)textures.add(value);}});
