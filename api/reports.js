@@ -20,7 +20,11 @@ export function validateReport(input){
 }
 export default async function handler(req,res){
  res.setHeader('Cache-Control','no-store');res.setHeader('Vary','X-Class-Code');res.setHeader('X-Content-Type-Options','nosniff');
- const url=process.env.UPSTASH_REDIS_REST_URL,token=process.env.UPSTASH_REDIS_REST_TOKEN;
+ // Vercel Marketplace may inject KV_* names. Select a complete pair so that
+ // credentials from two separately configured databases are never combined.
+ const upstash={url:process.env.UPSTASH_REDIS_REST_URL,token:process.env.UPSTASH_REDIS_REST_TOKEN};
+ const vercel={url:process.env.KV_REST_API_URL,token:process.env.KV_REST_API_TOKEN};
+ const {url,token}=upstash.url&&upstash.token?upstash:vercel;
  if(req.method==='GET'&&req.query.status==='1')return res.status(200).json({enabled:Boolean(url&&token)});
  if(!url||!token)return res.status(503).json({error:'학급 공유 저장소가 아직 연결되지 않았어요.'});
  if(!['GET','POST'].includes(req.method)){res.setHeader('Allow','GET, POST');return res.status(405).json({error:'지원하지 않는 요청이에요.'});}

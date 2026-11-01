@@ -103,7 +103,7 @@ blender -b --python scripts/convert_model.py -- /path/to/extracted-ply-files
 기본은 **이 브라우저에서 저장·전시하는 개인 체험**입니다. 친구 기기의 보고서까지 함께 전시하려면:
 
 1. Vercel 프로젝트의 Marketplace에서 **Upstash Redis**를 연결합니다. 요금·약관은 해당 서비스에서 확인합니다.
-2. 서버 환경변수 `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` 주입을 확인하고 재배포합니다. `VITE_` 접두사를 붙이거나 토큰을 코드·GitHub에 넣지 않습니다.
+2. Marketplace가 자동 등록한 `KV_REST_API_URL`, `KV_REST_API_TOKEN` 두 항목이 있으면 그대로 사용할 수 있습니다. 직접 설정한 `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` 조합도 지원합니다. 두 조합이 모두 있으면 완전한 `UPSTASH_*` 조합을 우선하며, 서로 다른 조합의 주소와 토큰을 섞지 않습니다. 환경변수 설정 후 재배포합니다. `VITE_` 접두사를 붙이거나 토큰을 코드·GitHub에 넣지 않습니다. `KV_REST_API_READ_ONLY_TOKEN`과 `REDIS_URL`은 보고서 저장 연결에 사용하지 않습니다.
 3. 교사가 충분히 긴 임의의 전시실 코드를 배포합니다(영문·숫자·하이픈 12~48자). 학생들은 게임 우측 상단 설정에서 같은 코드를 입력합니다.
 4. 이후 게시하는 보고서가 공유됩니다. 기존 로컬 보고서를 자동 업로드하지 않습니다.
 5. 야외 전시대에서 친구 보고서 새로고침/다음 전시판으로 읽습니다. 최대 200개를 목록에 유지하고 각 보고서는 30일 후 만료됩니다. 필요한 결과물은 읽기 창의 인쇄/PDF 또는 설정의 로컬 보고서 JSON 내보내기로 보관합니다.
