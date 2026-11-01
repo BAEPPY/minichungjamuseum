@@ -1,0 +1,77 @@
+{
+  "type": "multi-angle-photos",
+  "rows": 6,
+  "columns": 9,
+  "initialRow": 2,
+  "initialColumn": 4,
+  "poster": "2_4.jpg",
+  "frames": [
+    [
+      "0_0.jpg",
+      "0_1.jpg",
+      "0_2.jpg",
+      "0_3.jpg",
+      "0_4.jpg",
+      "0_5.jpg",
+      "0_6.jpg",
+      "0_7.jpg",
+      "0_8.jpg"
+    ],
+    [
+      "1_0.jpg",
+      "1_1.jpg",
+      "1_2.jpg",
+      "1_3.jpg",
+      "1_4.jpg",
+      "1_5.jpg",
+      "1_6.jpg",
+      "1_7.jpg",
+      "1_8.jpg"
+    ],
+    [
+      "2_0.jpg",
+      "2_1.jpg",
+      "2_2.jpg",
+      "2_3.jpg",
+      "2_4.jpg",
+      "2_5.jpg",
+      "2_6.jpg",
+      "2_7.jpg",
+      "2_8.jpg"
+    ],
+    [
+      "3_0.jpg",
+      "3_1.jpg",
+      "3_2.jpg",
+      "3_3.jpg",
+      "3_4.jpg",
+      "3_5.jpg",
+      "3_6.jpg",
+      "3_7.jpg",
+      "3_8.jpg"
+    ],
+    [
+      "4_0.jpg",
+      "4_1.jpg",
+      "4_2.jpg",
+      "4_3.jpg",
+      "4_4.jpg",
+      "4_5.jpg",
+      "4_6.jpg",
+      "4_7.jpg",
+      "4_8.jpg"
+    ],
+    [
+      "5_0.jpg",
+      "5_1.jpg",
+      "5_2.jpg",
+      "5_3.jpg",
+      "5_4.jpg",
+      "5_5.jpg",
+      "5_6.jpg",
+      "5_7.jpg",
+      "5_8.jpg"
+    ]
+  ],
+  "description": "국립중앙박물관 공식 뷰어 원본 다각도 사진 54장 · 3D 메시 아님"
+}

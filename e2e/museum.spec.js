@@ -72,10 +72,9 @@ const closeObservation=page=>page.locator('#observationDialog [data-close]').fir
 const reports=page=>page.evaluate(async()=>{const {all}=await import('/src/storage.js');return (await all()).filter(r=>r.type==='report');});
 
 test('full-screen world: compare three actual vases, record five celadons, publish one combined report',async({page})=>{
- // This real-data journey is deliberately not replaced by a lookalike Japanese
- // model. A skipped case means that the required original is still unavailable.
+ // Require the documented original photographs or a native model for every work.
  await page.goto('/favicon.svg');
- const sourcesReady=await page.evaluate(async()=>{const {comparisonArtifacts}=await import('/src/comparison-artifacts.js');return comparisonArtifacts.every(a=>!a.nativePending&&Boolean(a.model));});
+ const sourcesReady=await page.evaluate(async()=>{const {comparisonArtifacts}=await import('/src/comparison-artifacts.js');return comparisonArtifacts.every(a=>!a.nativePending&&Boolean(a.model||a.photoView));});
  test.skip(!sourcesReady,'The actual Japanese peony comparison source is not yet registered; no substitute model is used.');
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await enter(page);
@@ -90,6 +89,15 @@ test('full-screen world: compare three actual vases, record five celadons, publi
 
  for(const [id,name] of Object.entries(comparisonNames)){
   await openObservation(page,id,name);
+  if(id==='compare-peony'){
+   await expect(page.locator('#modelSource')).toContainText('원본 다각도 사진 54장');
+   const canvas=page.locator('#objectCanvas canvas');
+   await expect(canvas).toHaveAttribute('data-frame','2_4.jpg');
+   await canvas.focus();await page.keyboard.press('ArrowRight');
+   await expect(canvas).toHaveAttribute('data-frame','2_5.jpg');
+   await page.keyboard.press('+');
+   expect(Number(await canvas.getAttribute('data-zoom'))).toBeGreaterThan(1);
+  }
   await page.locator('#observationNote').fill(comparisonFeatures[id]);
   await page.locator('#takePhoto').click();
   await expect(page.locator('#photoTray img')).toHaveCount(1);

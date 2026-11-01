@@ -1,0 +1,333 @@
+{
+  "sourceViewerUrl": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/viewer.html",
+  "collection": "국립중앙박물관 · 신안11590",
+  "type": "multi-angle-photos",
+  "processing": "Original JPEG bytes retained without re-encoding. Official View360 configuration: 6 rows, 9 columns, %ROW_%COL.jpg, zero-based indices. Not a 3D mesh.",
+  "rights": "Follow the original National Museum of Korea usage terms; no new license granted.",
+  "files": [
+    {
+      "file": "0_0.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/0_0.jpg",
+      "bytes": 212556,
+      "sha256": "a4998152ce2efd4e85705fd508d2f3c6f978ab2472cc76de9087b983b6517347"
+    },
+    {
+      "file": "0_1.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/0_1.jpg",
+      "bytes": 206168,
+      "sha256": "9f780a5fae9d7962b0ffc62a966e3863bc576a3850928f2d93696a783c5934c8"
+    },
+    {
+      "file": "0_2.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/0_2.jpg",
+      "bytes": 210694,
+      "sha256": "cf6eaa3b4ee305209f59ffd6e3f18ac42ae4a2775aa144754e3bcc97fff8225b"
+    },
+    {
+      "file": "0_3.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/0_3.jpg",
+      "bytes": 207877,
+      "sha256": "b8f2cad09d2b84ae7be6caa34c8d24296cc8824d2536e169ca87466345783bd7"
+    },
+    {
+      "file": "0_4.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/0_4.jpg",
+      "bytes": 200849,
+      "sha256": "48e1d54765d3fcf08b1b378bd7424792da59c64c82cfef1ee2a029d3afcbd029"
+    },
+    {
+      "file": "0_5.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/0_5.jpg",
+      "bytes": 221059,
+      "sha256": "2f5ddc977c3ba3903e242ace883abb5405b24bf9282e1b1630d77d8894b52c26"
+    },
+    {
+      "file": "0_6.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/0_6.jpg",
+      "bytes": 202765,
+      "sha256": "edb0b48384d3e6c3e91139a2e030e98f1767513327e6f9c1e97a63749ba6c045"
+    },
+    {
+      "file": "0_7.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/0_7.jpg",
+      "bytes": 205014,
+      "sha256": "4f0ad5ec5838af19f947f15f8165b81da2f969c795eb781051d8cd02a58795d8"
+    },
+    {
+      "file": "0_8.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/0_8.jpg",
+      "bytes": 204693,
+      "sha256": "9af767f5f88b4b4469373735e934563fa2a2faaddcefd5de4f6e3e223fcd911f"
+    },
+    {
+      "file": "1_0.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/1_0.jpg",
+      "bytes": 241234,
+      "sha256": "7584e74b3f3d28daee5922b489ed2df7ec8f440eb1f25eddabde97e3b89727ad"
+    },
+    {
+      "file": "1_1.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/1_1.jpg",
+      "bytes": 232679,
+      "sha256": "e330a9335f22d4e2425b443ae9219552afa7290591b33b21f939a7a7477d46c7"
+    },
+    {
+      "file": "1_2.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/1_2.jpg",
+      "bytes": 236542,
+      "sha256": "f9068abded263db9622fd3e89fde37aac08d5d97d2fd29233a3ec8d8dab5fa15"
+    },
+    {
+      "file": "1_3.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/1_3.jpg",
+      "bytes": 229012,
+      "sha256": "e75e7547954a95f208ebbed5c792510d789a81c6f015c4aa12b785ff089a049f"
+    },
+    {
+      "file": "1_4.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/1_4.jpg",
+      "bytes": 227913,
+      "sha256": "b514dd3a59e11dd508c82da16f50cd8e404fb60453b038a8353971d6b4c63c01"
+    },
+    {
+      "file": "1_5.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/1_5.jpg",
+      "bytes": 228881,
+      "sha256": "81a1619011f4582765ecdfb30d9ebedeb04dbf2b2529050d7bc9645839d4b685"
+    },
+    {
+      "file": "1_6.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/1_6.jpg",
+      "bytes": 228245,
+      "sha256": "d3a19741accf91dfcb4317ab5aca3a106f9241c8ab05e97d0e2a48dfc289b3a3"
+    },
+    {
+      "file": "1_7.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/1_7.jpg",
+      "bytes": 237493,
+      "sha256": "f68763750eaa5cd96b42c102640229f49ad4af400b8b54a03528d539a4d88c79"
+    },
+    {
+      "file": "1_8.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/1_8.jpg",
+      "bytes": 238531,
+      "sha256": "a3f53c8acf94f32fbc52a87914acfc830425a7d9f3ac116a919aa8c542f0526d"
+    },
+    {
+      "file": "2_0.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/2_0.jpg",
+      "bytes": 260158,
+      "sha256": "41c5981a0139dee9bfcb39e4fd67c54fe2f391e359e777f2e197625dd9d2f109"
+    },
+    {
+      "file": "2_1.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/2_1.jpg",
+      "bytes": 252672,
+      "sha256": "77b709c7d241d89c62e90dcaa0461d0b115a822d1ead8ca9e3e5e67ec053aa4b"
+    },
+    {
+      "file": "2_2.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/2_2.jpg",
+      "bytes": 248909,
+      "sha256": "dfabd64180f3ba3825ddaf202ed3d0fda927ad555e2c403fafc86757a9714ee7"
+    },
+    {
+      "file": "2_3.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/2_3.jpg",
+      "bytes": 249536,
+      "sha256": "bc6de472fb8bceec93555dc14f130e71fd6f3ffada6b80d20e271d025d9c877c"
+    },
+    {
+      "file": "2_4.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/2_4.jpg",
+      "bytes": 249338,
+      "sha256": "81dddfdef75ca4c73e66f9ea2dfff977ff33af0c4462407e70525160e8af3018"
+    },
+    {
+      "file": "2_5.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/2_5.jpg",
+      "bytes": 247046,
+      "sha256": "2c5c658647bc45cf96cf0bf0b69c7f2cd49c75bb01cc68577694c6a10e6de4e5"
+    },
+    {
+      "file": "2_6.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/2_6.jpg",
+      "bytes": 252717,
+      "sha256": "97405d1ae461608cb122f81f492e2ecb2c63ec3435384559ac8f02c3bd77b7a1"
+    },
+    {
+      "file": "2_7.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/2_7.jpg",
+      "bytes": 269028,
+      "sha256": "41b16378250aa4f7322710cfdf68c58b3fefe7a747a918db345ae965717d6616"
+    },
+    {
+      "file": "2_8.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/2_8.jpg",
+      "bytes": 267592,
+      "sha256": "e36eb35961648f3ac777ad806c61ca0eeb2e9cc79d3c0f9533410ab3c60cdfbd"
+    },
+    {
+      "file": "3_0.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/3_0.jpg",
+      "bytes": 270472,
+      "sha256": "91179920a566176046feed41e96aa971db8d809b76705c8fbed235461a6bd134"
+    },
+    {
+      "file": "3_1.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/3_1.jpg",
+      "bytes": 255239,
+      "sha256": "6ff2186449b9217f27d07d1224e3572c1af2c3d8738fa633bf070ccddd7e147c"
+    },
+    {
+      "file": "3_2.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/3_2.jpg",
+      "bytes": 253532,
+      "sha256": "47b30b9635f379802516e05e6fb7aaabb62cf180ebeacba626d89612c2c10cd6"
+    },
+    {
+      "file": "3_3.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/3_3.jpg",
+      "bytes": 245163,
+      "sha256": "2b50779061fee0e185f8f3c5e29d09a6d5b3073efa3ca6fe00e908ae4868a7dc"
+    },
+    {
+      "file": "3_4.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/3_4.jpg",
+      "bytes": 249345,
+      "sha256": "56bf04618d27a240d8499218accc8414c3b660d9f836219508bbb07bc3e7a01f"
+    },
+    {
+      "file": "3_5.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/3_5.jpg",
+      "bytes": 252698,
+      "sha256": "cb992af20712cb068fa54b4830f7ace791e5955d314dc1ac2efffc21ec6ac78a"
+    },
+    {
+      "file": "3_6.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/3_6.jpg",
+      "bytes": 268791,
+      "sha256": "41da7dd282bd27dac0c6133dd2d66b5220b4376170eb877a9dcca573c525af7e"
+    },
+    {
+      "file": "3_7.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/3_7.jpg",
+      "bytes": 286803,
+      "sha256": "20492cd716bf2771c068b4fd27d41529f950b2e83ebfad3f0e63396ce1ec73d9"
+    },
+    {
+      "file": "3_8.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/3_8.jpg",
+      "bytes": 285479,
+      "sha256": "7557fffd3997b215627b397cb8035c98131e65dd779216b7b673d8b5ffae795a"
+    },
+    {
+      "file": "4_0.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/4_0.jpg",
+      "bytes": 260807,
+      "sha256": "8022ce789a959f7855a6cfc4a3fc97f58d1130f5a4825182232ec05bd1c5a329"
+    },
+    {
+      "file": "4_1.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/4_1.jpg",
+      "bytes": 246217,
+      "sha256": "9259cba7cc1e271541eb4a4f809ba83136272d13aedcc0c04a733567cfad8200"
+    },
+    {
+      "file": "4_2.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/4_2.jpg",
+      "bytes": 242306,
+      "sha256": "fbf4af4467967dfd16893d469a4cf269b5cb2b5709b35ad5516ac6e668aca3d5"
+    },
+    {
+      "file": "4_3.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/4_3.jpg",
+      "bytes": 235508,
+      "sha256": "653937c39cc4a84356ccaa135e7b895cbe75797d0d2866ed3a54f5c038bf7a9a"
+    },
+    {
+      "file": "4_4.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/4_4.jpg",
+      "bytes": 237673,
+      "sha256": "4e35d19c15cec32b2714290adcf6678b48537c90fc9e16a819d82a0a692eb21d"
+    },
+    {
+      "file": "4_5.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/4_5.jpg",
+      "bytes": 243896,
+      "sha256": "763f873fc202f912a94d94375f1b0004c8b031411f22a0211fb4e8cc99cb4ef2"
+    },
+    {
+      "file": "4_6.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/4_6.jpg",
+      "bytes": 256282,
+      "sha256": "da17a441e54a4aa28e4aa007814b0ebbb3f9a313abdd6e5a4c941f99e0d4e022"
+    },
+    {
+      "file": "4_7.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/4_7.jpg",
+      "bytes": 275858,
+      "sha256": "681cf309b4ff44afc115ac12eead0e3743549bfd5493499fe927652d12f6e1e8"
+    },
+    {
+      "file": "4_8.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/4_8.jpg",
+      "bytes": 271878,
+      "sha256": "97b7920a34721d27558b1d4f3b2396a6741dcaa4158bd1ec0e6c9575ba0961f5"
+    },
+    {
+      "file": "5_0.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/5_0.jpg",
+      "bytes": 241577,
+      "sha256": "6638a9cbb80fdc82757615d377e0e4e92f2deeb91f4ef2e6763606c15595e896"
+    },
+    {
+      "file": "5_1.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/5_1.jpg",
+      "bytes": 229191,
+      "sha256": "f2f4d32c5dd7a7acb619ccbc317da47f443240ae6b75753c3fcf9ff02fe13d37"
+    },
+    {
+      "file": "5_2.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/5_2.jpg",
+      "bytes": 222812,
+      "sha256": "a8f78b9ca228534729753d9d91d0c3afa473953c0f157adcb878b95e069e42c8"
+    },
+    {
+      "file": "5_3.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/5_3.jpg",
+      "bytes": 215032,
+      "sha256": "b1481c07c588fccfd92b68cadcccb247340ba4e0cc25aa34654a30c72e29658b"
+    },
+    {
+      "file": "5_4.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/5_4.jpg",
+      "bytes": 209414,
+      "sha256": "961f8b25961eff354163ac483525e57e235ed14834b8e02c48c7d2d1176aeed9"
+    },
+    {
+      "file": "5_5.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/5_5.jpg",
+      "bytes": 206572,
+      "sha256": "5b22ec8233583667ab94ba0a5e0b94ae5f8ac4f1cb17bfd1470b5c52929e533b"
+    },
+    {
+      "file": "5_6.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/5_6.jpg",
+      "bytes": 203347,
+      "sha256": "4095042f0a24c03c500152ed229d27b5cfd5e42d88d5882402c0ed71c3e1fc87"
+    },
+    {
+      "file": "5_7.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/5_7.jpg",
+      "bytes": 202172,
+      "sha256": "f83e15a7df949d82219efa4441df6360babe82f7d810959f735fae1f6a686ca8"
+    },
+    {
+      "file": "5_8.jpg",
+      "url": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/5_8.jpg",
+      "bytes": 199261,
+      "sha256": "30489f62ef91360cdeb5ee0dca6f76a5dafe0f5ad3224bc2de63a341a316dd2a"
+    }
+  ]
+}
