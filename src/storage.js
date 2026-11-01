@@ -1,0 +1,8 @@
+let dbPromise;
+function db(){return dbPromise??=new Promise((resolve,reject)=>{const r=indexedDB.open('celadon-museum',1);r.onupgradeneeded=()=>{r.result.createObjectStore('records',{keyPath:'id'});};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+export async function put(record){const d=await db();return new Promise((resolve,reject)=>{const t=d.transaction('records','readwrite');t.objectStore('records').put(record);t.oncomplete=resolve;t.onerror=()=>reject(t.error);});}
+export async function all(){const d=await db();return new Promise((resolve,reject)=>{const r=d.transaction('records').objectStore('records').getAll();r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+export async function get(id){const d=await db();return new Promise((resolve,reject)=>{const r=d.transaction('records').objectStore('records').get(id);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+export async function remove(id){const d=await db();return new Promise((resolve,reject)=>{const t=d.transaction('records','readwrite');t.objectStore('records').delete(id);t.oncomplete=resolve;t.onerror=()=>reject(t.error);});}
+export async function shareStatus(){try{const r=await fetch('/api/reports?status=1');if(!r.ok)return false;return (await r.json()).enabled===true;}catch{return false;}}
+export async function sharedRequest(code,method='GET',report,cursor){const r=await fetch('/api/reports'+(cursor!==undefined?'?cursor='+cursor:''),{method,headers:{'Content-Type':'application/json','X-Class-Code':code},...(report?{body:JSON.stringify(report)}:{})});const body=await r.json();if(!r.ok)throw Error(body.error||'전시실에 연결하지 못했어요.');return body;}

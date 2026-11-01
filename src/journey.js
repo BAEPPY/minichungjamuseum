@@ -1,0 +1,19 @@
+export const makingSteps=[
+ {name:'흙 준비하기',verb:'고르고 반죽해요',text:'고운 흙에서 돌과 불순물을 골라내고, 물을 섞어 골고루 반죽해요. 그릇을 빚을 재료를 준비하는 과정이에요.',question:'흙에 큰 돌이 섞여 있다면 어떤 일이 생길까요?',tone:'clay'},
+ {name:'모양 빚기',verb:'쓰임에 맞게 빚어요',text:'물레를 돌리거나 손으로 흙을 다듬어 모양을 만들어요. 주전자에는 주둥이와 손잡이를 붙이는 것처럼, 쓰임에 맞는 형태를 생각해야 해요.',question:'주전자와 베개는 왜 서로 다른 모양일까요?',tone:'wheel'},
+ {name:'무늬 꾸미기',verb:'파거나, 뚫거나, 채워요',text:'조금 마른 표면을 파서 무늬를 새기거나, 구멍을 뚫어 꾸밀 수 있어요. 상감은 파낸 무늬에 다른 색의 흙을 채워 넣는 방법이에요.',question:'모든 청자에 상감 무늬가 있을까요? 색과 모양을 살린 청자도 있어요.',tone:'carve'},
+ {name:'말리고 초벌굽기',verb:'천천히 말려 먼저 구워요',text:'형태와 장식을 다듬은 뒤 충분히 말리고, 가마에서 한 번 구워요. 이를 초벌굽기라고 해요.',question:'젖은 흙을 바로 센 불에 넣으면 어떻게 될까요?',tone:'dry'},
+ {name:'유약 바르기',verb:'유약을 고르게 입혀요',text:'초벌한 그릇에 유약을 발라요. 유약은 구운 뒤 표면을 덮는 유리질 층이 되어 색과 광택을 만들어 줘요.',question:'청자의 매끈한 표면과 은은한 빛은 무엇과 관계가 있을까요?',tone:'glaze'},
+ {name:'가마에서 완성하기',verb:'불과 기다림으로 완성해요',text:'유약을 입힌 그릇을 높은 온도에서 다시 구워요. 가마의 온도와 불을 조절하고 천천히 식혀야 청자가 완성돼요.',question:'청자 한 점에는 어떤 사람들의 기술과 노력이 담겨 있을까요?',tone:'fire'}
+];
+const pot='<path d="M112 70Q101 79 95 99Q79 137 96 170Q103 190 105 201H195Q197 190 204 170Q221 137 205 99Q199 79 188 70L177 52V37H123V52Z" fill="currentColor" stroke="#365348" stroke-width="3"/>';
+export function makingArt(tone,technique='inlay'){
+ let art='';
+ if(tone==='clay')art='<ellipse cx="150" cy="193" rx="104" ry="19" fill="#c8b894"/><path d="M65 183Q81 141 111 146Q119 106 150 132Q186 110 204 151Q225 147 238 183Z" fill="#ad8968"/><path d="M93 177Q118 148 139 165M158 156Q189 142 205 176" fill="none" stroke="#d9bc93" stroke-width="8" stroke-linecap="round"/><circle cx="60" cy="116" r="6" fill="#e8d4b0"/><circle cx="230" cy="120" r="4" fill="#e8d4b0"/>';
+ if(tone==='wheel')art='<ellipse cx="150" cy="218" rx="103" ry="21" fill="#5e6a56"/><ellipse cx="150" cy="207" rx="103" ry="21" fill="#c6c4aa"/>'+pot+'<path d="M91 119L54 103M208 119L245 103" stroke="#ddb59a" stroke-width="20" stroke-linecap="round"/><path d="M235 218q25-20-4-32" fill="none" stroke="#7e9873" stroke-width="3" stroke-dasharray="5 5"/>';
+ if(tone==='carve')art=pot+(technique==='inlay'?'<path d="M112 123Q150 90 188 123Q150 159 112 123ZM112 165Q150 132 188 165" stroke="#eee4cf" stroke-width="9" fill="none"/><path d="M208 70L163 119" stroke="#c0a27b" stroke-width="8" stroke-linecap="round"/>':'<g fill="#e9ebdd" stroke="#365348" stroke-width="3"><circle cx="130" cy="117" r="11"/><circle cx="169" cy="117" r="11"/><circle cx="150" cy="153" r="11"/></g>');
+ if(tone==='dry')art=pot+'<path d="M218 65q-12 12 0 24t0 24M241 65q-12 12 0 24t0 24" stroke="#b9b595" stroke-width="4" fill="none"/><circle cx="62" cy="62" r="17" fill="#d7bc73"/><path d="M62 31V20M62 105V94M31 62H20M104 62H93" stroke="#d7bc73" stroke-width="3"/>';
+ if(tone==='glaze')art='<ellipse cx="150" cy="210" rx="111" ry="29" fill="#aac7b2"/>'+pot+'<path d="M92 139Q150 155 208 139L201 182Q197 194 195 201H105Q103 188 98 177Z" fill="#77a78e"/><path d="M208 44l-19 58M217 48l-19 58" stroke="#b3916d" stroke-width="8"/><path d="M181 106l18 6" stroke="#7aa68b" stroke-width="18"/>';
+ if(tone==='fire')art='<path d="M40 224V102Q40 28 150 28Q260 28 260 102V224Z" fill="#a87d59" stroke="#7a6148" stroke-width="3"/><path d="M72 224V113Q72 63 150 63Q228 63 228 113V224Z" fill="#473f33"/><g stroke="#c39b72" stroke-width="3"><path d="M45 103H80M219 103H255M40 146H72M228 146H260M95 42V79M145 28V63M198 40V80"/></g><g transform="translate(60 52) scale(.6)">'+pot+'</g><path d="M96 224Q74 196 104 176Q99 200 124 209Q119 172 150 149Q141 187 165 200Q180 183 179 170Q220 204 196 224Z" fill="#de9b5d"/><path d="M126 224Q118 204 144 188Q138 214 164 217Q167 202 176 198Q189 216 178 224Z" fill="#f4d38a"/>';
+ return `<svg viewBox="0 0 300 260" role="img" aria-label="${makingSteps.find(s=>s.tone===tone)?.name||'청자 제작'} 과정 설명 그림"><circle cx="150" cy="132" r="113" fill="#e8eadc"/><g style="color:${tone==='glaze'||tone==='fire'?'#98bba1':'#c5a47d'}">${art}</g></svg>`;
+}
