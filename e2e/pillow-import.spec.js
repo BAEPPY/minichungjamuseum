@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {seedCompletedComparison} from './helpers/course.js';
 import {readFile} from 'node:fs/promises';
 
 test('a local pillow model overrides the hybrid viewer and removal restores original references',async({page})=>{
@@ -8,11 +9,7 @@ test('a local pillow model overrides the hybrid viewer and removal restores orig
  // this test does not claim that importing it creates a measured original scan.
  const fixture=await readFile(new URL('../public/models/celadon-pillow-reconstruction.glb',import.meta.url));
  const fileName='pillow-local-model-fixture.glb';
- await page.goto('/favicon.svg');
- await page.evaluate(async()=>{
-  const {put}=await import('/src/storage.js');
-  await put({id:'game-progress',making:[],visited:[],inside:true,exited:false,profileReady:true,avatarHair:'short',videoCompleted:true,videoId:'YM7FhGcR_5E',position:{x:4,z:2.8,inside:true},avatarName:'베개 자료 탐험가',avatarColor:'#eccd79'});
- });
+ await seedCompletedComparison(page,{position:{x:4,z:2.8,inside:true},avatarName:'베개 자료 탐험가'});
  await page.goto('/');
  await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});
  await expect(page.locator('#nearName')).toHaveText('청자 상감 모란·구름·학무늬 베개');

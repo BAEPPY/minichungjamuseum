@@ -1,4 +1,5 @@
 import {artifacts} from './artifacts.js';
+import {comparisonArtifacts,comparisonPositions,allObservationArtifacts} from './comparison-artifacts.js';
 import {artifactSprite,artifactSpriteKey,clearArtifactSprite} from './artifact-sprites.js';
 import {createSpriteRaster,SPRITE_MARKERS} from './sprite-geometry.js';
 import {TILE_WIDTH as TILE_W,TILE_HEIGHT as TILE_H,projectMap as project} from './projection.js';
@@ -6,7 +7,7 @@ import {TILE_WIDTH as TILE_W,TILE_HEIGHT as TILE_H,projectMap as project} from '
 const COLLECTION=[[4,1],[8,1],[4,-3.5],[8,-3.5],[6,-8]];
 const ART={
  building:'/art/museum-building.png',gate:'/art/museum-gate.png',stone:'/art/stone-tile.png',wood:'/art/wood-tile.png',wall:'/art/gallery-wall.png',
- case:'/art/props/display-case.png',tree:'/art/props/tree.png',flowers:'/art/props/flower-planter.png',bench:'/art/props/bench.png',screen:'/art/props/video-screen.png',desk:'/art/props/writing-desk.png',frame:'/art/props/report-frame.png',
+ case:'/art/props/display-case.png',tree:'/art/props/tree.png',flowers:'/art/props/flower-planter.png',bench:'/art/props/bench.png',desk:'/art/props/writing-desk.png',frame:'/art/props/report-frame.png',
  short:'/art/sprites/avatar-short.png',bob:'/art/sprites/avatar-bob.png'
 };
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
@@ -37,16 +38,17 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
  }
  const assetPromises=Object.entries(ART).map(([key,url])=>imageAsset(key,url,key==='wall'));
  const ready=Promise.all(assetPromises).then(()=>{if(!destroyed)canvas.dataset.assetsReady=String(Object.keys(ART).every(name=>name==='wall'||images.has(name)));});
- async function reloadArtifact(id){const artifact=artifacts.find(a=>a.id===id);if(!artifact)return;clearArtifactSprite(id);artifactImages.delete(id);const key=artifactSpriteKey(artifact),image=await artifactSprite(artifact);if(!destroyed&&artifactSpriteKey(artifact)===key)artifactImages.set(id,{image,rect:alphaRect(image)});}
- for(const artifact of artifacts)reloadArtifact(artifact.id).catch(()=>{});
+ async function reloadArtifact(id){const artifact=allObservationArtifacts.find(a=>a.id===id);if(!artifact)return;clearArtifactSprite(id);artifactImages.delete(id);const key=artifactSpriteKey(artifact),image=await artifactSprite(artifact);if(!destroyed&&artifactSpriteKey(artifact)===key)artifactImages.set(id,{image,rect:alphaRect(image)});}
+ for(const artifact of allObservationArtifacts)reloadArtifact(artifact.id).catch(()=>{});
  const hot=(id,type,label,x,z,extra={})=>{const item={id,type,name:label,position:[x,z],...extra};hotspots.set(id,item);return item;};
  hot('entrance','entrance','박물관 입장',0,7);
  hot('exit','exit','관람을 마치고 나가기',0,3.4);
- hot('video','video','고려청자 제작 영상',-6,-3);
+ hot('comparison-desk','comparison-desk','세 점 비교 기록',-4,-12);
  hot('desk','desk','관람 보고서 작성',0,-12);
  hot('publish','publish','내 보고서 전시하기',10,17);
  artifacts.forEach((artifact,i)=>{const [x,z]=COLLECTION[i];hot(artifact.id,'artifact',artifact.name,x,z,{artifact,index:i});obstacles.push({x,z,w:1.05,d:.95});});
- obstacles.push({x:-6,z:-3,w:1.7,d:1.0},{x:0,z:-12,w:1.6,d:.9},{x:10,z:17,w:1,d:.8});
+ comparisonArtifacts.forEach((artifact,i)=>{const [x,z]=comparisonPositions[i];hot(artifact.id,'artifact',artifact.name,x,z,{artifact,index:i});obstacles.push({x,z,w:1.05,d:.95});});
+ obstacles.push({x:-4,z:-12,w:1.6,d:.9},{x:0,z:-12,w:1.6,d:.9},{x:10,z:17,w:1,d:.8});
  const decor=(kind,x,z,w,room,extra={})=>decorations.push({kind,x,z,w,room,...extra});
  // Architecture shares the entrance axis. Its stair/opening markers are placed
  // on the path; footprint centers remain at their calibrated ground anchors.
@@ -186,12 +188,7 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
   drawSprite('case',x,z,width,{layer:'front'});
   plaque(`${item.index+1}. ${item.artifact.shortName||item.artifact.name}`,x,z,{offset:-(spriteBottom('case',width)+13),width:175,size:9});
  }
- function drawVideo(item){
-  const [x,z]=item.position,width=170;if(near?.id===item.id)highlight(item,3,1.3);shadow(x,z,130,25);drawSprite('screen',x,z,width);
-  if(sprite('screen',width)){const board=spriteQuad('screen',x,z,width,SPRITE_MARKERS.screen.board),points=[[.41,.34],[.41,.66],[.65,.5]].map(([u,v])=>quadPoint(board,u,v));ctx.save();ctx.fillStyle='#fcf6d8';ctx.shadowColor='#193c35';ctx.shadowBlur=4;ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fill();ctx.restore();}
-  plaque('청자는 어떻게 만들어질까요?',x,z,{offset:-(spriteBottom('screen',width)+14),width:200,size:10,dark:true});
- }
- function drawDesk(item){const [x,z]=item.position,width=150;if(near?.id===item.id)highlight(item,2.7,1.7);shadow(x,z,110,25);drawSprite('desk',x,z,width);plaque(item.type==='publish'?'내 보고서 걸기':'나의 관람 보고서',x,z,{offset:-(spriteBottom('desk',width)+14),width:165,dark:true});}
+ function drawDesk(item){const [x,z]=item.position,width=150;if(near?.id===item.id)highlight(item,2.7,1.7);shadow(x,z,110,25);drawSprite('desk',x,z,width);plaque(item.type==='publish'?'내 보고서 걸기':item.type==='comparison-desk'?'세 점 비교 기록':'나의 관람 보고서',x,z,{offset:-(spriteBottom('desk',width)+14),width:165,dark:true});}
  function drawReport(item){
   const [x,z]=item.position,width=100;if(near?.id===item.id)highlight(item,1.9,1.1);shadow(x,z,90,20);drawSprite('frame',x,z,width);
   if(item.paper&&sprite('frame',width))drawQuadImage(item.paper,spriteQuad('frame',x,z,width,SPRITE_MARKERS.frame.paper));
@@ -226,7 +223,7 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
  function paint(){
   ctx.setTransform(pixelRatio,0,0,pixelRatio,0,0);paintBackground();
   if(indoors){region(-12,-16,12,4.5,'#baa179');floorAtlas('wood',-12,-16,12,4);wallStrip(-12,-16,12,-16);wallStrip(-12,-16,-12,4.5);
-   plaque('먼저 영상을 보고 청자를 만나 보세요',-6,-12,{offset:110,width:290,dark:true,size:12});plaque('고려의 쓰임과 아름다움',6,-13,{offset:105,width:260,dark:true,size:12});
+   plaque('1 · 세 나라의 도자기를 비교해요',-6,-13,{offset:110,width:290,dark:true,size:12});plaque('2 · 고려청자 다섯 점을 탐구해요',6,-13,{offset:105,width:290,dark:true,size:12});
   }else{
    region(-12,-3,28,25,'#9bb477');region(-8,-1,26,24,'#e1d7ad',false);
    floorAtlas('stone',-8,-1,26,24);
@@ -238,7 +235,7 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
   for(const item of hotspots.values()){
    const outdoor=['entrance','publish','report'].includes(item.type);if(indoors===outdoor)continue;
    if(item.type==='entrance'||item.type==='exit'){portal(item);plaque(item.type==='entrance'?'입장하기 · F':'관람 마치기 · F',...item.position,{offset:item.type==='entrance'?-37:41,width:155,dark:true});continue;}
-   commands.push({depth:item.position[0]+item.position[1],draw:()=>item.type==='artifact'?drawArtifact(item):item.type==='video'?drawVideo(item):item.type==='report'?drawReport(item):drawDesk(item)});
+   commands.push({depth:item.position[0]+item.position[1],draw:()=>item.type==='artifact'?drawArtifact(item):item.type==='report'?drawReport(item):drawDesk(item)});
   }
   commands.push({depth:player.x+player.z+.12,draw:drawPlayer});commands.sort((a,b)=>a.depth-b.depth);for(const command of commands)command.draw();
  }
@@ -253,7 +250,7 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
  function clearKeys(){keys={};touch={x:0,y:0};waypoints=[];target={...player};}
  function interact(){if(near&&!paused)onInteract(near);}
  function pointer(event){if(paused)return;const rect=canvas.getBoundingClientRect(),point={x:event.clientX-rect.left,y:event.clientY-rect.top};
-  const definitions={artifact:['case',128],video:['screen',170],desk:['desk',150],publish:['desk',150],report:['frame',100]};
+  const definitions={artifact:['case',128],'comparison-desk':['desk',150],desk:['desk',150],publish:['desk',150],report:['frame',100]};
   // Pick the foremost opaque sprite pixel. Its calibrated ground center is
   // still the movement/interaction destination; tall paper and screens click
   // correctly without stealing hits from the next exhibit's empty corners.

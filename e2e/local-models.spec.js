@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {seedCompletedComparison} from './helpers/course.js';
 import {readFile} from 'node:fs/promises';
 
 test('a native GLB survives reload, a bad replacement preserves it, and removal preserves notes',async({page})=>{
@@ -8,12 +9,7 @@ test('a native GLB survives reload, a bad replacement preserves it, and removal 
  // and is never added to the application's default collection by this test.
  const fixture=await readFile(new URL('../public/models/celadon-incense.glb',import.meta.url));
  const fileName='native-upload-fixture.glb';
- await page.goto('/favicon.svg');
- await page.evaluate(async()=>{
-  const storage=await import('/src/storage.js');
-  // Old prototype placeholders must not count as observing the current collection.
-  await storage.put({id:'game-progress',making:[],visited:['stool','ewer'],inside:true,exited:false,profileReady:true,avatarHair:'short',videoCompleted:true,videoId:'YM7FhGcR_5E',position:{x:8,z:2.8,inside:true},avatarName:'원본 자료 탐험가',avatarColor:'#e8cf91'});
- });
+ await seedCompletedComparison(page,{position:{x:8,z:2.8,inside:true},avatarName:'원본 자료 탐험가',visited:['stool','ewer'],progressOverrides:{collectionVersion:null}});
  await page.goto('/');
  await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});
  await expect(page.locator('#nearName')).toHaveText('청자 투각 의자');
@@ -41,14 +37,14 @@ test('a native GLB survives reload, a bad replacement preserves it, and removal 
  });
 
  // Migration clears the old generic chair/ewer before either current work is opened.
- await expect(page.locator('#visitProgress')).toHaveText('유물 관찰 0/5');
+ await expect(page.locator('#visitProgress')).toContainText('청자 0/5');
  await openStool();
  await expect(page.locator('#takePhoto')).toBeEnabled({timeout:30000});
  await expect(page.locator('#chooseForReport')).toBeEnabled();
  await expect(page.locator('#objectCanvas canvas')).toHaveCount(1);
  await expect(page.locator('#objectCanvas iframe')).toHaveCount(0);
- await expect(page.locator('#modelSource')).toContainText(/재현|복원|근사/);
- await expect(page.locator('#visitProgress')).toHaveText('유물 관찰 1/5');
+ await expect(page.locator('#modelSource')).toContainText(/원본 형상.*색상/);
+ await expect(page.locator('#visitProgress')).toContainText('청자 1/5');
  expect(await storedModel()).toBeNull();
  await closeObservation();
 
@@ -101,7 +97,8 @@ test('a native GLB survives reload, a bad replacement preserves it, and removal 
 
  await openSettings();
  await page.locator('#localModelRemove').click();
- await expect(page.locator('#localModelStatus')).toContainText('기본 자료로 돌아왔어요.');
+ // Restoring the built-in PBR model also rebuilds its map thumbnail.
+ await expect(page.locator('#localModelStatus')).toContainText('기본 자료로 돌아왔어요.',{timeout:45000});
  await expect(page.locator('#localModelImport')).toBeEnabled();
  await expect(page.locator('#localModelRemove')).toBeDisabled();
  expect(await storedModel()).toBeNull();
@@ -111,11 +108,11 @@ test('a native GLB survives reload, a bad replacement preserves it, and removal 
  await expect(page.locator('#chooseForReport')).toBeEnabled();
  await expect(page.locator('#objectCanvas canvas')).toHaveCount(1);
  await expect(page.locator('#objectCanvas iframe')).toHaveCount(0);
- await expect(page.locator('#modelSource')).toContainText(/재현|복원|근사/);
+ await expect(page.locator('#modelSource')).toContainText(/원본 형상.*색상/);
  await expect(page.locator('#modelSource')).not.toContainText(fileName);
- expect(await page.evaluate(async()=>{const {artifacts}=await import('/src/artifacts.js');return artifacts.find(a=>a.id==='stool').model;})).toBe('/models/celadon-stool-reconstruction.glb');
+ expect(await page.evaluate(async()=>{const {artifacts}=await import('/src/artifacts.js');return artifacts.find(a=>a.id==='stool').model;})).toBe('/models/celadon-stool-wrl.glb');
   // Removing the local file does not invalidate its genuine observation history.
-  await expect(page.locator('#visitProgress')).toHaveText('유물 관찰 1/5');
+  await expect(page.locator('#visitProgress')).toContainText('청자 1/5');
  await expect(page.locator('#photoTray img')).toHaveCount(3);
  await expect(page.locator('#observationNote')).toHaveValue('이 기기에 등록한 원본 파일을 관찰하며 남긴 기록');
  expect(errors).toEqual([]);

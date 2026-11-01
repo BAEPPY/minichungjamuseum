@@ -1,5 +1,5 @@
 import './local-model-controls.css';
-import {artifacts} from './artifacts.js';
+import {allObservationArtifacts as artifacts} from './comparison-artifacts.js';
 import {getLocalModel,importLocalModel,removeLocalModel} from './local-models.js';
 
 function safeSource(value){
@@ -15,7 +15,7 @@ export function mountLocalModelControls(host,{onChanged=()=>{},onError=()=>{}}={
  const help=document.createElement('p');help.className='local-model-help';help.textContent='GLB 파일을 이 기기에 저장해 직접 관찰합니다. 학급 전체에 배포하려면 원본 파일을 저장소에 추가해야 합니다.';
  const label=document.createElement('label');label.htmlFor='localModelArtifact';label.textContent='자료를 등록할 유물';
  const select=document.createElement('select');select.id='localModelArtifact';
- for(const artifact of artifacts){const option=document.createElement('option');option.value=artifact.id;option.textContent=artifact.name;select.append(option);}
+ for(const artifact of artifacts){const option=document.createElement('option');option.value=artifact.id;option.textContent=artifact.comparison?`비교관 · ${artifact.name}`:artifact.name;select.append(option);}
  select.value=artifacts.find(a=>a.nativePending||a.externalView)?.id||artifacts[0]?.id||'';
  const status=document.createElement('p');status.id='localModelStatus';status.className='local-model-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
  const file=document.createElement('input');file.id='localModelFile';file.type='file';file.accept='.glb,model/gltf-binary';file.hidden=true;file.setAttribute('aria-label','등록할 3D GLB 파일');
