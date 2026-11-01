@@ -46,5 +46,11 @@ export function artifactSprite(original){
    }catch(error){reject(error);}finally{if(object)disposeModel(object);disposeLighting?.();if(renderer){renderer.dispose();renderer.forceContextLoss();}}
   });
  });
- thumbnails.set(key,result);return result;
+ const ready=result.catch(error=>{
+  // Keep the display case recognizable if a model thumbnail cannot load.
+  // Observation still uses its own loader and original-photo fallback.
+  if(artifact.model&&artifact.mapPreview&&!artifact.preferMapPreview)return loadImage(artifact.mapPreview);
+  throw error;
+ });
+ thumbnails.set(key,ready);return ready;
 }

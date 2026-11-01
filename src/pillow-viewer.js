@@ -4,25 +4,30 @@ import './pillow-viewer.css';
 
 const MODEL_SOURCE='사진 참고 재현 모델 · 형상 근사 (실측 스캔 아님)';
 const MODEL_CAPTURE='사진 참고 재현 모델 · 형상 근사';
-const PHOTO_SOURCE='다각도 사진 관찰 · 제공 SWF에서 추출한 원본 사진 54장';
-const PHOTO_CAPTURE='다각도 사진 관찰 · 사용자 제공 SWF 원본 이미지';
+const PHOTO_SOURCE='다각도 사진 관찰 · 제공 원본 사진';
+const PHOTO_CAPTURE='다각도 원본 사진 관찰';
+const MODEL_STATUS='사진을 참고해 재현한 입체 모형이에요. 형상·무늬 배치 일부는 추정했으므로 원본 사진과 함께 확인해 보세요.';
 
 /** A site-owned adapter for a photo-reference model and its original photographs.
  * Nothing is embedded from the museum or executed from the original SWF.
  * onState is called after construction, and again while switching/ready/error.
  */
 export function createPillowViewer(el,artifact,{onState=()=>{}}={}){
- if(!(el instanceof HTMLElement))throw new Error('베개 관찰 화면을 표시할 공간이 필요해요.');
+ const name=artifact.name||'유물';
+ if(!(el instanceof HTMLElement))throw new Error(`${name} 관찰 화면을 표시할 공간이 필요해요.`);
  const modelPath=artifact.model||artifact.reconstructionModel;
  const hasModel=Boolean(modelPath),hasPhotos=Boolean(artifact.photoView);
- if(!hasModel&&!hasPhotos)throw new Error('베개의 모델이나 원본 사진 자료가 필요해요.');
+ if(!hasModel&&!hasPhotos)throw new Error(`${name}의 모델이나 원본 사진 자료가 필요해요.`);
+ // The original pillow adapter used 54 frames; explicit counts let other
+ // photo-reference exhibits share its interaction without changing that label.
+ const photoCount=Number.isInteger(artifact.photoCount)&&artifact.photoCount>0?artifact.photoCount:54;
 
  const root=document.createElement('section');
- root.className='pillow-viewer';root.setAttribute('aria-label',`${artifact.name} 관찰 방식`);
+ root.className='pillow-viewer';root.setAttribute('aria-label',`${name} 관찰 방식`);
  const toolbar=document.createElement('div');
- toolbar.className='pillow-viewer-modes';toolbar.setAttribute('role','group');toolbar.setAttribute('aria-label','베개 관찰 방식 선택');
+ toolbar.className='pillow-viewer-modes';toolbar.setAttribute('role','group');toolbar.setAttribute('aria-label',`${name} 관찰 방식 선택`);
  const buttons=new Map();
- for(const [mode,label,available] of [['model','3D 재현',hasModel],['photos','원본 사진 54장',hasPhotos]]){
+ for(const [mode,label,available] of [['model','3D 재현',hasModel],['photos',`원본 사진 ${photoCount}장`,hasPhotos]]){
   const button=document.createElement('button');button.type='button';button.dataset.pillowMode=mode;button.textContent=label;
   button.disabled=!available;button.setAttribute('aria-pressed','false');
   if(!available)button.title=mode==='model'?'3D 재현 자료가 아직 준비되지 않았어요.':'원본 사진 자료가 없어요.';
@@ -53,7 +58,7 @@ export function createPillowViewer(el,artifact,{onState=()=>{}}={}){
   status.textContent=state.loading
    ? state.mode==='model'?'3D 재현 모델을 여는 중이에요.':'원본 관찰 사진을 여는 중이에요.'
    : state.error&&!state.fallback?'관찰 자료를 열지 못했어요. 다른 관찰 방식을 선택해 주세요.'
-   : state.mode==='model'?'밑면 무늬도 원본 사진을 참고했어요. 형상·배치 일부는 추정한 재현이므로 원본 사진과 비교해 보세요.':'원본 사진을 바꾸어 관찰해요. 사진 속 형태와 무늬를 확인해 보세요.';
+   : state.mode==='model'?artifact.reconstructionStatus||MODEL_STATUS:'원본 사진을 바꾸어 관찰해요. 사진 속 형태와 무늬를 확인해 보세요.';
   warning.hidden=!state.fallback;
   warning.textContent=state.fallback?'3D 재현 자료를 열지 못해 원본 사진으로 전환했어요.':'';
   onState(snapshot());

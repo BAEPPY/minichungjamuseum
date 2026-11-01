@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {writeFile} from 'node:fs/promises';
 import {seedCompletedComparison,moveToCourseDestination} from './helpers/course.js';
 
 test.setTimeout(210000);
@@ -117,7 +118,82 @@ test('a pending comparison source cannot be captured or counted and there is no 
  await expectGalleryLocked(page);
 });
 
-test('Japanese original photos recover from manifest and frame failures, then preserve real captures and notes',async({page})=>{
+test('Japanese reconstructed 3D responds to small continuous drags and preserves mode-correct captures',async({page})=>{
+ const errors=[],museumRequests=[],originalPhotoRequests=[];
+ page.on('pageerror',error=>errors.push(error.message));
+ page.on('request',request=>{const url=new URL(request.url());if(url.hostname==='museum.go.kr'||url.hostname.endsWith('.museum.go.kr'))museumRequests.push(request.url());if(/^\/models\/japan-peony\/\d_\d\.jpg$/.test(url.pathname))originalPhotoRequests.push(url.pathname);});
+ await page.setViewportSize({width:1440,height:960});
+ await seedStart(page);await loadMuseum(page);
+ await moveToCourseDestination(page,'compare-peony');await page.keyboard.press('f');
+ const hybrid=page.locator('#objectCanvas .pillow-viewer'),canvas=page.locator('#objectCanvas canvas');
+ await expect(page.locator('#observationDialog')).toBeVisible();
+ await expect(hybrid).toHaveAttribute('data-mode','model');
+ await expect(hybrid).toHaveAttribute('data-state','ready',{timeout:45000});
+ await expect(page.locator('#takePhoto')).toBeEnabled();
+ await expect(page.locator('#modelSource')).toContainText('사진 기반 3D 재현');
+ await expect(page.locator('#modelSource')).toContainText('실측 스캔 아님');
+ await expect(page.locator('#objectCanvas canvas')).toHaveCount(1);
+ await expect(page.locator('#objectCanvas iframe')).toHaveCount(0);
+ expect(await canvas.getAttribute('data-frame')).toBeNull();
+ expect(originalPhotoRequests).toEqual([]);
+ const source=await page.evaluate(async()=>{
+  const {comparisonArtifacts}=await import('/src/comparison-artifacts.js'),{get}=await import('/src/storage.js');
+  const {loadArtifactModel,disposeModel}=await import('/src/models.js');const artifact=comparisonArtifacts.find(a=>a.id==='compare-peony');
+  const model=await loadArtifactModel(artifact),meshes=[];model.traverse(node=>{if(node.isMesh)meshes.push(node);});
+  const photoMaterials=[...new Set(meshes.flatMap(node=>[].concat(node.material)))].filter(material=>material.isMeshBasicMaterial&&material.map);
+  const result={path:artifact.model,hybrid:artifact.hybridView,preservePhotoColors:artifact.preservePhotoColors,localOverride:Boolean(await get('native-model-compare-peony')),vertices:meshes.reduce((sum,node)=>sum+node.geometry.getAttribute('position').count,0),texturedMeshes:meshes.filter(node=>[].concat(node.material).some(m=>m.map)).length,unlitPhotoMaterials:photoMaterials.map(material=>({toneMapped:material.toneMapped,colorSpace:material.map.colorSpace}))};
+  disposeModel(model);return result;
+ });
+ expect(source.path).toBe('/models/japan-peony-reconstruction.glb');expect(source.hybrid).toBe(true);expect(source.localOverride).toBe(false);
+ expect(source.vertices).toBeGreaterThan(1000);expect(source.texturedMeshes).toBeGreaterThan(0);
+ expect(source.preservePhotoColors).toBe(true);expect(source.unlitPhotoMaterials.length).toBeGreaterThan(0);
+ for(const material of source.unlitPhotoMaterials)expect(material).toEqual({toneMapped:false,colorSpace:'srgb'});
+ // Six pixels is below the original photo viewer's half-frame threshold.
+ // Every movement must still produce a new native render, without JPEG swaps.
+ await canvas.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+ const views=[await canvas.evaluate(node=>node.toDataURL('image/png'))],box=await canvas.boundingBox();
+ const start={x:box.x+box.width*.5,y:box.y+box.height*.5};
+ await page.mouse.move(start.x,start.y);await page.mouse.down();
+ for(let step=1;step<=3;step++){
+  await page.mouse.move(start.x+step*6,start.y);
+  await expect.poll(()=>canvas.evaluate(node=>node.toDataURL('image/png')),{timeout:15000}).not.toBe(views.at(-1));
+  views.push(await canvas.evaluate(node=>node.toDataURL('image/png')));
+ }
+ await page.mouse.up();expect(new Set(views).size).toBe(4);expect(originalPhotoRequests).toEqual([]);
+ await page.evaluate(()=>{
+  window.__peonyCaptureFooters=[];const original=CanvasRenderingContext2D.prototype.fillText;
+  CanvasRenderingContext2D.prototype.fillText=function(text,x,y,...rest){if(this.font==='11px sans-serif'&&y===this.canvas.height-10)window.__peonyCaptureFooters.push(String(text));return original.call(this,text,x,y,...rest);};
+ });
+ await page.locator('#takePhoto').click();await expect(page.locator('#photoTray img')).toHaveCount(1);
+ const modelPhoto=await page.locator('#photoTray img').getAttribute('src');expect(modelPhoto).toMatch(/^data:image\/jpeg;base64,/);
+ const modelFooter='사진 기반 3D 재현 · 일본 세토 · 모란무늬 매병 · 형상 추정 / 국립중앙박물관 원본 사진 참고';
+ expect(await page.evaluate(()=>window.__peonyCaptureFooters)).toEqual([modelFooter]);
+ await page.screenshot({path:'/workspace/game-japan-continuous-3d.png'});
+ await page.locator('[data-pillow-mode="photos"]').click();
+ await expect(hybrid).toHaveAttribute('data-mode','photos');await expect(hybrid).toHaveAttribute('data-state','ready',{timeout:30000});
+ await expect(canvas).toHaveAttribute('data-frame','2_4.jpg');await expect(page.locator('#modelSource')).toContainText('원본 다각도 사진 54장');
+ await canvas.focus();await page.keyboard.press('ArrowRight');await expect(canvas).toHaveAttribute('data-frame','2_5.jpg');
+ await page.locator('#takePhoto').click();await expect(page.locator('#photoTray img')).toHaveCount(2);
+ const originalPhoto=await page.locator('#photoTray img').nth(1).getAttribute('src');expect(originalPhoto).not.toBe(modelPhoto);
+ const photoFooter='다각도 원본 사진 · 일본 세토 · 청자 음인각 모란무늬 매병 / 국립중앙박물관';
+ const captureFooters=await page.evaluate(()=>window.__peonyCaptureFooters);expect(captureFooters).toEqual([modelFooter,photoFooter]);
+ const note='부드러운 3D 회전으로 전체 형태를 보고 원본 사진에서 모란무늬를 확인했어요.';
+ await page.locator('#observationNote').fill(note);await expect(page.locator('#noteStatus')).toContainText('저장했어요');
+ await page.screenshot({path:'/workspace/game-japan-original-photos.png'});
+ await page.locator('#chooseForReport').click();await expect(page.locator('#comparisonDialog')).toBeVisible();
+ await expect(page.locator('#comparisonRecords [data-comparison-note="compare-peony"]')).toHaveValue(note);
+ expect(await page.locator('#comparisonRecords img').evaluateAll(images=>images.map(image=>image.getAttribute('src')))).toEqual([modelPhoto,originalPhoto]);
+ await page.reload();await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:60000});
+ await moveToCourseDestination(page,'compare-peony');await page.keyboard.press('f');
+ await expect(hybrid).toHaveAttribute('data-mode','model');await expect(hybrid).toHaveAttribute('data-state','ready',{timeout:45000});
+ await expect(page.locator('#observationNote')).toHaveValue(note);
+ expect(await page.locator('#photoTray img').evaluateAll(images=>images.map(image=>image.getAttribute('src')))).toEqual([modelPhoto,originalPhoto]);
+ await page.locator('[data-pillow-mode="photos"]').click();await expect(hybrid).toHaveAttribute('data-state','ready',{timeout:30000});
+ await expect(canvas).toHaveAttribute('data-frame','2_4.jpg');expect(museumRequests).toEqual([]);expect(errors).toEqual([]);
+ await writeFile('/workspace/game-japan-3d-diagnostics.json',JSON.stringify({source,dragStepPixels:6,dragSteps:3,distinctRenders:new Set(views).size,captureFooters,originalPhotoRequests,museumRequests,pageErrors:errors},null,2));
+});
+
+test('Japanese original photos recover from manifest and frame failures after a real model failure',async({page})=>{
  const errors=[],museumRequests=[],localPhotoRequests=[],mapPreviewRequests=[];
  page.on('pageerror',error=>errors.push(error.message));
  page.on('request',request=>{
@@ -127,7 +203,8 @@ test('Japanese original photos recover from manifest and frame failures, then pr
   if(url.pathname==='/art/previews/japan-peony-cutout.png')mapPreviewRequests.push(url.pathname);
  });
  const manifestPattern='**/models/japan-peony/manifest.json',framePattern='**/models/japan-peony/2_4.jpg';
- let manifestFailures=0,frameFailures=0;
+ let modelFailures=0,manifestFailures=0,frameFailures=0;
+ await page.route('**/models/japan-peony-reconstruction.glb',route=>{modelFailures++;return route.abort('failed');});
  await page.route(manifestPattern,route=>{manifestFailures++;return route.abort('failed');});
  await seedStart(page);
  await loadMuseum(page);
@@ -136,10 +213,10 @@ test('Japanese original photos recover from manifest and frame failures, then pr
   const a=comparisonArtifacts.find(a=>a.id==='compare-peony');
   return {photoView:a.photoView,mapPreview:a.mapPreview,model:a.model||null,pending:Boolean(a.nativePending),localOverride:Boolean(await get('native-model-compare-peony'))};
  });
- expect(source).toEqual({photoView:'/models/japan-peony/manifest.json',mapPreview:'/art/previews/japan-peony-cutout.png',model:null,pending:false,localOverride:false});
+ expect(source).toEqual({photoView:'/models/japan-peony/manifest.json',mapPreview:'/art/previews/japan-peony-cutout.png',model:'/models/japan-peony-reconstruction.glb',pending:false,localOverride:false});
  await expect(page.locator('video,iframe')).toHaveCount(0);
  await moveToCourseDestination(page,'compare-peony');
- expect(mapPreviewRequests.length).toBeGreaterThan(0);
+ await expect.poll(()=>mapPreviewRequests.length,{timeout:30000}).toBeGreaterThan(0);
  const previewAlpha=await page.evaluate(async path=>{
   const image=new Image();image.src=path;await image.decode();
   const canvas=new OffscreenCanvas(32,32),ctx=canvas.getContext('2d');ctx.drawImage(image,0,0,32,32);
@@ -152,7 +229,11 @@ test('Japanese original photos recover from manifest and frame failures, then pr
  await page.screenshot({path:'/workspace/game-comparison-japan-map.png'});
  await page.keyboard.press('f');
  await expect(page.locator('#observationDialog')).toBeVisible();
+ const hybrid=page.locator('#objectCanvas .pillow-viewer');
+ await expect.poll(()=>modelFailures).toBeGreaterThan(0);
  await expect.poll(()=>manifestFailures).toBeGreaterThan(0);
+ await expect(hybrid).toHaveAttribute('data-mode','photos');
+ await expect(hybrid).toHaveAttribute('data-state','error');
  await expect(page.locator('#gameToast')).toContainText('관찰 자료를 열지 못했어요.');
  await expect(page.locator('#takePhoto')).toBeDisabled();
  expect((await progress(page)).comparisonVisited).not.toContain('compare-peony');
@@ -168,7 +249,7 @@ test('Japanese original photos recover from manifest and frame failures, then pr
  await expect(page.locator('#objectName')).toHaveText('청자 음인각 모란무늬 매병');
  await expect.poll(()=>frameFailures).toBeGreaterThan(0);
  const canvas=page.locator('#objectCanvas canvas');
- await expect(canvas).toHaveAttribute('data-error','관찰 사진을 불러오지 못했어요.');
+ await expect(hybrid).toHaveAttribute('data-state','error');
  await expect(page.locator('#takePhoto')).toBeDisabled();
  expect((await progress(page)).comparisonVisited).not.toContain('compare-peony');
  await page.locator('#observationDialog [data-close]').first().click();
@@ -176,6 +257,10 @@ test('Japanese original photos recover from manifest and frame failures, then pr
  await page.keyboard.press('f');
  await expect(page.locator('#observationDialog')).toBeVisible();
  await expect(page.locator('#takePhoto')).toBeEnabled({timeout:45000});
+ await expect(hybrid).toHaveAttribute('data-mode','photos');
+ await expect(hybrid).toHaveAttribute('data-state','ready');
+ await expect(hybrid.locator('.pillow-viewer-warning')).toBeVisible();
+ await expect(hybrid.locator('.pillow-viewer-warning')).toContainText('원본 사진으로 전환했어요.');
  await expect(canvas).toHaveAttribute('data-frame','2_4.jpg');
  await expect(page.locator('#objectCanvas canvas')).toHaveCount(1);
  await expect(page.locator('#objectCanvas iframe')).toHaveCount(0);
@@ -215,7 +300,7 @@ test('Japanese original photos recover from manifest and frame failures, then pr
  expect(localPhotoRequests).toContain('/models/japan-peony/manifest.json');
  expect(localPhotoRequests).toContain('/models/japan-peony/2_5.jpg');
  expect(museumRequests).toEqual([]);expect(errors).toEqual([]);
- await test.info().attach('japanese-original-photo-requests',{body:JSON.stringify({manifestFailures,frameFailures,localPhotoRequests,mapPreviewRequests,previewAlpha,museumRequests,pageErrors:errors},null,2),contentType:'application/json'});
+ await writeFile('/workspace/game-japan-fallback-diagnostics.json',JSON.stringify({modelFailures,manifestFailures,frameFailures,localPhotoRequests,mapPreviewRequests,previewAlpha,museumRequests,pageErrors:errors},null,2));
 });
 
 test('a failed real comparison model stays unvisited, then a successful retry preserves photos and notes',async({page})=>{

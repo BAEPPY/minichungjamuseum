@@ -91,6 +91,13 @@ test('full-screen world: compare three actual vases, record five celadons, publi
  for(const [id,name] of Object.entries(comparisonNames)){
   await openObservation(page,id,name);
   if(id==='compare-peony'){
+   const hybrid=page.locator('#objectCanvas .pillow-viewer');
+   await expect(hybrid).toHaveAttribute('data-mode','model');
+   await expect(hybrid).toHaveAttribute('data-state','ready');
+   await expect(page.locator('#modelSource')).toContainText('사진 기반 3D 재현');
+   await page.locator('[data-pillow-mode="photos"]').click();
+   await expect(hybrid).toHaveAttribute('data-mode','photos');
+   await expect(hybrid).toHaveAttribute('data-state','ready',{timeout:30000});
    await expect(page.locator('#modelSource')).toContainText('원본 다각도 사진 54장');
    const canvas=page.locator('#objectCanvas canvas');
    await expect(canvas).toHaveAttribute('data-frame','2_4.jpg');
