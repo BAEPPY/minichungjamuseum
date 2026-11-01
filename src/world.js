@@ -1,5 +1,6 @@
 import {artifacts} from './artifacts.js';
 import {artifactSprite} from './artifact-sprites.js';
+import {createSpriteRaster,SPRITE_MARKERS} from './sprite-geometry.js';
 
 const TILE_W=64,TILE_H=32;
 const COLLECTION=[[4,1],[8,1],[4,-3.5],[8,-3.5],[6,-8]];
@@ -26,7 +27,7 @@ function alphaRect(image,source){
 export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{},inside=false,avatarColor='#e8cf91',avatarName='나의 탐험가',avatarHair='short'}={}){
  const canvas=document.createElement('canvas');canvas.setAttribute('aria-label','캐릭터를 움직여 탐험하는 고려청자 박물관');canvas.style.cssText='display:block;width:100%;height:100%;touch-action:none';el.append(canvas);
  const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)throw Error('박물관 지도를 그릴 수 없어요.');
- const images=new Map(),artifactImages=new Map(),spriteFrames=new Map(),recolored=new Map(),hotspots=new Map(),obstacles=[],retryTimers=new Set(),rasters=new Map();
+ const images=new Map(),artifactImages=new Map(),spriteFrames=new Map(),recolored=new Map(),hotspots=new Map(),obstacles=[],retryTimers=new Set(),rasters=new Map(),spriteRasters=new Map();
  let width=1,height=1,pixelRatio=1,zoom=1.12,indoors=inside,paused=false,destroyed=false,near=null,lastNear=null,frame,waypoints=[],walking=false,walkTime=0,direction='front',flip=false;
  let player={x:inside?-2:0,z:inside?2.7:11},target={...player},camera=project(player.x,player.z),touch={x:0,y:0},keys={},reports=[];
  let name=avatarName,color=avatarColor,hair=avatarHair==='bob'?'bob':'short';
@@ -43,18 +44,23 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
  hot('exit','exit','관람을 마치고 나가기',0,3.4);
  hot('video','video','고려청자 제작 영상',-6,-3);
  hot('desk','desk','관람 보고서 작성',0,-12);
- hot('publish','publish','내 보고서 전시하기',14,17);
+ hot('publish','publish','내 보고서 전시하기',10,17);
  hot('online-3d','external','온라인 3D 추가 자료',10,-12);obstacles.push({x:10,z:-12,w:1.1,d:.9});
  artifacts.forEach((artifact,i)=>{const [x,z]=COLLECTION[i];hot(artifact.id,'artifact',artifact.name,x,z,{artifact,index:i});obstacles.push({x,z,w:1.05,d:.95});});
- obstacles.push({x:-6,z:-3,w:1.7,d:1.0},{x:0,z:-12,w:1.6,d:.9},{x:14,z:17,w:1,d:.8});
- const decor=(kind,x,z,w,extra={})=>decorations.push({kind,x,z,w,...extra});
- // An entrance garden with a real illustrated building, trees and flowerbeds.
- decor('building',0,5.5,510,{outside:true});decor('building',20,6.0,340,{outside:true});decor('gate',-1,23.2,300,{outside:true});
- for(const [x,z,w]of [[-9,9,165],[-10,20,150],[9,23,158],[25,7,180],[25,22,155],[-10,-12,130]]){decor('tree',x,z,w,{outside:z>4});if(z>4)obstacles.push({x,z,w:.6,d:.6});}
- for(let x=-7;x<=11;x+=2.5)decor('flowers',x,24,104,{outside:true});
- for(let z=8;z<22;z+=3.2){decor('flowers',-6,z,92,{outside:true});decor('flowers',23,z,92,{outside:true});}
- for(const [x,z]of [[-3,16],[7,20],[20,21],[-8,-10],[-8,1],[0,-6]])decor('bench',x,z,112,{outside:z>4});
- for(const [x,z]of [[-10,-13],[10,-13],[-10,2],[10,2]])decor('flowers',x,z,95,{inside:true});
+ obstacles.push({x:-6,z:-3,w:1.7,d:1.0},{x:0,z:-12,w:1.6,d:.9},{x:10,z:17,w:1,d:.8});
+ const decor=(kind,x,z,w,room,extra={})=>decorations.push({kind,x,z,w,room,...extra});
+ // Architecture shares the entrance axis. Its stair/opening markers are placed
+ // on the path; footprint centers remain at their calibrated ground anchors.
+ decor('building',0,3,480,'outside',{id:'main-building',align:{point:SPRITE_MARKERS.building.entrance,at:[0,6.25]},label:'고려청자박물관'});
+ decor('building',20,2,300,'outside',{label:'우리들의 발견 전시관'});
+ decor('gate',0,23,270,'outside',{align:{point:SPRITE_MARKERS.gate.opening,at:[0,22.8]}});
+ for(const [x,z]of [[-10,4],[-10,24],[27,4],[27,24]]){decor('tree',x,z,160,'outside');obstacles.push({x,z,w:.65,d:.65,room:'outside'});}
+ for(const x of [6,10,14,18,22])decor('flowers',x,24,98,'outside');
+ for(const z of [8,12,16,20]){decor('flowers',-6,z,96,'outside',{mirror:true});decor('flowers',26,z,96,'outside',{mirror:true});}
+ for(const [x,z,mirror]of [[-4,16,false],[8,20,false],[20,22,true]])decor('bench',x,z,108,'outside',{mirror});
+ for(const [x,z,mirror]of [[-8,-10,false],[-8,1,false],[-2,-8,true]])decor('bench',x,z,104,'inside',{mirror});
+ for(const [x,z]of [[-10,-14],[10,-14],[-10,3],[11,-6]])decor('flowers',x,z,86,'inside',{mirror:x>0});
+ obstacles.push({x:-9.75,z:14,w:1.25,d:4,room:'outside'});
 
  function ground(x,z){return project(x,z);}
  function screen(x,z){const p=ground(x,z);return {x:(p.x-camera.x)*zoom+width/2,y:(p.y-camera.y)*zoom+height*.55};}
@@ -110,9 +116,43 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
   }
   ctx.strokeStyle='#344c5b';ctx.lineWidth=7*zoom;ctx.beginPath();ctx.moveTo(a.x,a.y-h+2*zoom);ctx.lineTo(b.x,b.y-h+2*zoom);ctx.stroke();
  }
- function drawSprite(kind,x,z,displayWidth,{height:displayHeight,offsetY=0,alpha=1,mirror=false}={}){
-  const asset=images.get(kind);if(!asset)return false;const p=screen(x,z),r=asset.rect,logicalHeight=displayHeight||displayWidth*r.h/r.w,w=displayWidth*zoom,h=logicalHeight*zoom,image=raster(kind,asset,displayWidth,logicalHeight);
-  ctx.save();ctx.globalAlpha=alpha;ctx.imageSmoothingEnabled=false;if(mirror){ctx.translate(p.x,p.y-offsetY*zoom);ctx.scale(-1,1);ctx.drawImage(image,-w/2,-h,w,h);}else ctx.drawImage(image,p.x-w/2,p.y-h-offsetY*zoom,w,h);ctx.restore();return true;
+ function sprite(kind,displayWidth){
+  const asset=images.get(kind);if(!asset)return null;const key=`${kind}:${displayWidth}`;
+  if(!spriteRasters.has(key))spriteRasters.set(key,createSpriteRaster(kind,asset,displayWidth));return spriteRasters.get(key);
+ }
+ function spritePoint(kind,x,z,displayWidth,sourcePoint,{mirror=false,offsetY=0}={}){
+  const geometry=sprite(kind,displayWidth);if(!geometry)return screen(x,z);const p=screen(x,z),q=geometry.point(...sourcePoint);
+  return {x:p.x+(mirror?-q.x:q.x)*zoom,y:p.y+(q.y-offsetY)*zoom};
+ }
+ function spriteBottom(kind,displayWidth){const geometry=sprite(kind,displayWidth);return geometry?geometry.top+geometry.height:16;}
+ function decorPosition(item){
+  if(!item.align)return item;const geometry=sprite(item.kind,item.w);if(!geometry)return item;
+  const p=geometry.point(...item.align.point),[x,z]=item.align.at;
+  return {...item,x:x-p.x/TILE_W-p.y/TILE_H,z:z-p.y/TILE_H+p.x/TILE_W};
+ }
+ function drawSprite(kind,x,z,displayWidth,{offsetY=0,alpha=1,mirror=false}={}){
+  const geometry=sprite(kind,displayWidth);if(!geometry)return null;const p=screen(x,z);
+  ctx.save();ctx.globalAlpha=alpha;ctx.imageSmoothingEnabled=false;ctx.translate(p.x,p.y-offsetY*zoom);ctx.scale(mirror?-zoom:zoom,zoom);ctx.drawImage(geometry.image,geometry.left,geometry.top,geometry.width,geometry.height);ctx.restore();return geometry;
+ }
+ function quadPoint(quad,u,v){return {x:(1-v)*((1-u)*quad[0].x+u*quad[1].x)+v*((1-u)*quad[3].x+u*quad[2].x),y:(1-v)*((1-u)*quad[0].y+u*quad[1].y)+v*((1-u)*quad[3].y+u*quad[2].y)};}
+ function spriteQuad(kind,x,z,width,points,options={}){return points.map(p=>spritePoint(kind,x,z,width,p,options));}
+ function drawQuadImage(image,quad){
+  const w=image.naturalWidth||image.width,h=image.naturalHeight||image.height;
+  const source=[[0,0],[w,0],[w,h],[0,h]];
+  for(const triangle of [[0,1,2],[0,2,3]]){
+   const [i,j,k]=triangle,a=source[i],b=source[j],c=source[k],p=quad[i],q=quad[j],r=quad[k];
+   const ux=b[0]-a[0],uy=b[1]-a[1],vx=c[0]-a[0],vy=c[1]-a[1],det=ux*vy-vx*uy;
+   const dx=q.x-p.x,dy=q.y-p.y,ex=r.x-p.x,ey=r.y-p.y;
+   const ma=(dx*vy-ex*uy)/det,mb=(dy*vy-ey*uy)/det,mc=(ex*ux-dx*vx)/det,md=(ey*ux-dy*vx)/det;
+   ctx.save();ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.lineTo(r.x,r.y);ctx.closePath();ctx.clip();ctx.transform(ma,mb,mc,md,p.x-ma*a[0]-mc*a[1],p.y-mb*a[0]-md*a[1]);ctx.imageSmoothingEnabled=true;ctx.drawImage(image,0,0);ctx.restore();
+  }
+ }
+ function reportPaper(report,image){
+  const paper=document.createElement('canvas');paper.width=480;paper.height=720;const context=paper.getContext('2d');context.fillStyle='#fffaf0';context.fillRect(0,0,480,720);
+  const ratio=Math.min(400/(image.naturalWidth||image.width),320/(image.naturalHeight||image.height)),w=(image.naturalWidth||image.width)*ratio,h=(image.naturalHeight||image.height)*ratio;
+  context.fillStyle='#e8eee3';context.fillRect(36,38,408,328);context.drawImage(image,240-w/2,202-h/2,w,h);context.fillStyle='#375a43';context.textAlign='center';context.font='bold 31px sans-serif';
+  const wrap=(text,y,fontSize,limit)=>{context.font=`${fontSize}px sans-serif`;let line='',row=0;for(const letter of String(text||'')){if(context.measureText(line+letter).width>402){context.fillText(line,240,y+row*fontSize*1.5);line='';if(++row===limit)return;}line+=letter;}if(line)context.fillText(line,240,y+row*fontSize*1.5);};
+  wrap(report.title,418,31,2);context.fillStyle='#6e8065';wrap(`${report.name} 탐험가`,535,25,1);context.strokeStyle='#d6dfcf';context.beginPath();context.moveTo(44,571);context.lineTo(436,571);context.stroke();context.fillStyle='#587050';wrap(report.features,620,21,2);return paper;
  }
  function shadow(x,z,w=75,h=20){const p=screen(x,z);ctx.fillStyle='#3852381a';ctx.beginPath();ctx.ellipse(p.x,p.y,w*zoom/2,h*zoom/2,0,0,Math.PI*2);ctx.fill();}
  function plaque(text,x,z,{offset=0,width:boxWidth=130,dark=false,size=10}={}){
@@ -122,19 +162,29 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
  function portal(item){const p=screen(...item.position),pulse=.72+Math.sin(performance.now()/550)*.1;ctx.save();ctx.globalAlpha=.5;ctx.fillStyle='#fff8c9';ctx.beginPath();ctx.ellipse(p.x,p.y,38*zoom,17*zoom,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=pulse;ctx.strokeStyle='#dfbf42';ctx.lineWidth=5*zoom;ctx.beginPath();ctx.ellipse(p.x,p.y,29*zoom,13*zoom,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
  function highlight(item,w=1.95,d=1.6){ctx.save();ctx.strokeStyle='#f8dc39';ctx.lineWidth=3*zoom;ctx.shadowColor='#f4d632';ctx.shadowBlur=7*zoom;diamond(item.position[0],item.position[1],w,d);ctx.stroke();ctx.restore();}
  function drawArtifact(item){
-  const [x,z]=item.position,selected=near?.id===item.id;shadow(x,z,110,30);if(selected)highlight(item);
-  const asset=images.get('case');let caseHeight=140;
-  if(asset){caseHeight=Math.min(165,145*asset.rect.h/asset.rect.w);drawSprite('case',x,z,145,{height:caseHeight});}
-  const snapshot=artifactImages.get(item.id),p=screen(x,z);
-  if(snapshot){const r=snapshot.rect;let h=item.artifact.photoPoster?55:Math.min(69,caseHeight*.5),w=h*r.w/r.h;
-   if(w>85){h*=85/w;w=85;}ctx.save();ctx.imageSmoothingEnabled=true;ctx.drawImage(snapshot.image,r.x,r.y,r.w,r.h,p.x-w*zoom/2,p.y-(caseHeight*.33+h)*zoom,w*zoom,h*zoom);ctx.restore();}
-  plaque(`${item.index+1}. ${item.artifact.name.replace('청자 투각 칠보무늬 향로','칠보무늬 향로')}`,x,z,{offset:-17,width:160,size:9});
+  const [x,z]=item.position,width=128,geometry=sprite('case',width);shadow(x,z,105,28);if(near?.id===item.id)highlight(item,2.8,1.5);drawSprite('case',x,z,width);
+  const snapshot=artifactImages.get(item.id);
+  if(snapshot&&geometry){const r=snapshot.rect,base=spritePoint('case',x,z,width,SPRITE_MARKERS.case.modelBase),support=geometry.point(...SPRITE_MARKERS.case.modelBase),ceiling=geometry.point(770,225),floor=SPRITE_MARKERS.case.innerFloor.map(p=>geometry.point(...p));
+   const maxHeight=Math.max(1,support.y-ceiling.y-5),maxWidth=Math.min(75,(Math.max(...floor.map(p=>p.x))-Math.min(...floor.map(p=>p.x)))*.72);let h=Math.min(item.artifact.photoPoster?45:60,maxHeight),w=h*r.w/r.h;if(w>maxWidth){h*=maxWidth/w;w=maxWidth;}
+   ctx.save();ctx.imageSmoothingEnabled=true;ctx.drawImage(snapshot.image,r.x,r.y,r.w,r.h,base.x-w*zoom/2,base.y-h*zoom,w*zoom,h*zoom);ctx.restore();}
+  plaque(`${item.index+1}. ${item.artifact.name.replace('청자 투각 칠보무늬 향로','칠보무늬 향로')}`,x,z,{offset:-(spriteBottom('case',width)+13),width:150,size:9});
  }
- function drawVideo(item){const [x,z]=item.position;if(near?.id===item.id)highlight(item,3,2);shadow(x,z,150,35);drawSprite('screen',x,z,235,{height:185});const p=screen(x,z);ctx.save();ctx.fillStyle='#fcf6d8';ctx.shadowColor='#193c35';ctx.shadowBlur=6;ctx.beginPath();ctx.moveTo(p.x-12*zoom,p.y-104*zoom);ctx.lineTo(p.x-12*zoom,p.y-68*zoom);ctx.lineTo(p.x+18*zoom,p.y-86*zoom);ctx.closePath();ctx.fill();ctx.restore();plaque('청자는 어떻게 만들어질까요?',x,z,{offset:-17,width:200,size:10,dark:true});}
- function drawExternal(item){const [x,z]=item.position;if(near?.id===item.id)highlight(item,2.3,1.6);shadow(x,z,110,25);drawSprite('screen',x,z,140,{height:120});plaque('온라인 3D 추가 자료',x,z,{offset:-16,width:160,size:9,dark:true});}
- function drawDesk(item){const [x,z]=item.position;if(near?.id===item.id)highlight(item,2.7,1.8);shadow(x,z,120,30);drawSprite('desk',x,z,175,{height:135});plaque(item.type==='publish'?'내 보고서 걸기':'나의 관람 보고서',x,z,{offset:-16,width:165,dark:true});}
- function drawReport(item){const [x,z]=item.position;if(near?.id===item.id)highlight(item,2.4,1.2);shadow(x,z,125,25);drawSprite('frame',x,z,155,{height:175});const p=screen(x,z),image=item.poster;
-  if(image){ctx.save();ctx.imageSmoothingEnabled=true;ctx.fillStyle='#fff9e8';ctx.fillRect(p.x-46*zoom,p.y-137*zoom,92*zoom,102*zoom);ctx.drawImage(image,p.x-42*zoom,p.y-132*zoom,84*zoom,66*zoom);ctx.font=`${8*zoom}px sans-serif`;ctx.fillStyle='#547348';ctx.textAlign='center';ctx.fillText(item.report.name+' 탐험가',p.x,p.y-47*zoom,82*zoom);ctx.restore();}plaque(item.report.title,x,z,{offset:-16,width:160,size:9});}
+ function drawVideo(item){
+  const [x,z]=item.position,width=170;if(near?.id===item.id)highlight(item,3,1.3);shadow(x,z,130,25);drawSprite('screen',x,z,width);
+  if(sprite('screen',width)){const board=spriteQuad('screen',x,z,width,SPRITE_MARKERS.screen.board),points=[[.41,.34],[.41,.66],[.65,.5]].map(([u,v])=>quadPoint(board,u,v));ctx.save();ctx.fillStyle='#fcf6d8';ctx.shadowColor='#193c35';ctx.shadowBlur=4;ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fill();ctx.restore();}
+  plaque('청자는 어떻게 만들어질까요?',x,z,{offset:-(spriteBottom('screen',width)+14),width:200,size:10,dark:true});
+ }
+ function drawExternal(item){
+  const [x,z]=item.position,width=108;if(near?.id===item.id)highlight(item,2.2,1.1);shadow(x,z,95,20);drawSprite('screen',x,z,width);
+  if(sprite('screen',width)){let badge=rasters.get('external-badge');if(!badge){badge=document.createElement('canvas');badge.width=320;badge.height=240;const context=badge.getContext('2d');context.fillStyle='#233641';context.fillRect(0,0,320,240);context.fillStyle='#f4e9b9';context.font='bold 88px sans-serif';context.textAlign='center';context.textBaseline='middle';context.fillText('3D',160,120);rasters.set('external-badge',badge);}drawQuadImage(badge,spriteQuad('screen',x,z,width,SPRITE_MARKERS.screen.board));}
+  plaque('온라인 3D 추가 자료',x,z,{offset:-(spriteBottom('screen',width)+14),width:165,size:9,dark:true});
+ }
+ function drawDesk(item){const [x,z]=item.position,width=150;if(near?.id===item.id)highlight(item,2.7,1.7);shadow(x,z,110,25);drawSprite('desk',x,z,width);plaque(item.type==='publish'?'내 보고서 걸기':'나의 관람 보고서',x,z,{offset:-(spriteBottom('desk',width)+14),width:165,dark:true});}
+ function drawReport(item){
+  const [x,z]=item.position,width=100;if(near?.id===item.id)highlight(item,1.9,1.1);shadow(x,z,90,20);drawSprite('frame',x,z,width);
+  if(item.paper&&sprite('frame',width))drawQuadImage(item.paper,spriteQuad('frame',x,z,width,SPRITE_MARKERS.frame.paper));
+  plaque(item.report.title,x,z,{offset:-(spriteBottom('frame',width)+14),width:145,size:9});
+ }
 
  function prepareFrame(asset,row,column){
   const key=`${hair}:${row}:${column}`;if(spriteFrames.has(key))return spriteFrames.get(key);
@@ -166,14 +216,13 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
   if(indoors){region(-12,-16,12,4.5,'#baa179');floorAtlas('wood',-12,-16,12,4,4);wallStrip(-12,-16,12,-16);wallStrip(-12,-16,-12,4.5);
    plaque('먼저 영상을 보고 청자를 만나 보세요',-6,-12,{offset:110,width:290,dark:true,size:12});plaque('고려의 쓰임과 아름다움',6,-13,{offset:105,width:260,dark:true,size:12});
   }else{
-   region(-12,5,26,25,'#9bb477');region(-8,6,23.5,24,'#e1d7ad',false);
-   floorAtlas('stone',-8,6,23.5,24);
+   region(-12,-3,28,25,'#9bb477');region(-8,-1,26,24,'#e1d7ad',false);
+   floorAtlas('stone',-8,-1,26,24);
    // A lily pond is a simple ground surface; illustrated trees/planters surround it.
-   region(-11,12,-7,20,'#9fcfc6',false);ctx.save();ctx.strokeStyle='#d9e9d3';ctx.lineWidth=2*zoom;const a=screen(-10.7,12.3),b=screen(-7.3,19.7);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore();
-   plaque('고려청자박물관',0,6,{offset:235,width:300,dark:true,size:16});plaque('우리들의 발견 전시 마당',19,8,{offset:130,width:300,dark:true,size:14});
+   region(-11,10,-8.5,18,'#9fcfc6',false);ctx.save();ctx.strokeStyle='#d9e9d3';ctx.lineWidth=2*zoom;const a=screen(-10.7,10.3),b=screen(-8.8,17.7);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore();
   }
-  const visibleDecor=decorations.filter(d=>indoors?d.inside||d.z<4:!d.inside&&d.z>4);
-  const commands=visibleDecor.map(d=>({depth:d.x+d.z,draw:()=>{shadow(d.x,d.z,d.w*.65,25);drawSprite(d.kind,d.x,d.z,d.w);}}));
+  const visibleDecor=decorations.filter(d=>d.room===(indoors?'inside':'outside')).map(decorPosition);
+  const commands=visibleDecor.map(d=>({depth:d.x+d.z,draw:()=>{shadow(d.x,d.z,d.w*.55,23);const geometry=drawSprite(d.kind,d.x,d.z,d.w,{mirror:d.mirror});if(d.label&&geometry)plaque(d.label,d.x,d.z,{offset:-geometry.top+20,width:290,dark:true,size:d.id==='main-building'?15:12});}}));
   for(const item of hotspots.values()){
    const outdoor=['entrance','publish','report'].includes(item.type);if(indoors===outdoor)continue;
    if(item.type==='entrance'||item.type==='exit'){portal(item);plaque(item.type==='entrance'?'입장하기 · F':'관람 마치기 · F',...item.position,{offset:41,width:155,dark:true});continue;}
@@ -181,7 +230,7 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
   }
   commands.push({depth:player.x+player.z+.12,draw:drawPlayer});commands.sort((a,b)=>a.depth-b.depth);for(const command of commands)command.draw();
  }
- function blocked(x,z){if(x< -11.1||x>25||z< -14.6||z>24)return true;if(!indoors&&z<5.2)return true;if(indoors&&(z>4.1||x>11.1))return true;return obstacles.some(o=>Math.abs(x-o.x)<o.w&&Math.abs(z-o.z)<o.d);}
+ function blocked(x,z){if(x< -11.1||x>27||z< -14.6||z>24)return true;if(!indoors&&z<5.2)return true;if(indoors&&(z>4.1||x>11.1))return true;return obstacles.some(o=>(!o.room||o.room===(indoors?'inside':'outside'))&&Math.abs(x-o.x)<o.w&&Math.abs(z-o.z)<o.d);}
  function route(x,z){
   if(blocked(x,z))return false;
   const step=.5,toCell=(x,z)=>[Math.round((x+11)/step),Math.round((z+15)/step)],start=toCell(player.x,player.z),end=toCell(x,z),key=(x,z)=>`${x},${z}`,queue=[start],parents=new Map([[key(...start),null]]);let found=null;
@@ -191,11 +240,21 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
  function moveTo(id){const item=hotspots.get(id);return item?route(item.position[0],item.position[1]+(item.type==='exit'?-1.6:1.7)):false;}
  function clearKeys(){keys={};touch={x:0,y:0};waypoints=[];target={...player};}
  function interact(){if(near&&!paused)onInteract(near);}
- function pointer(event){if(paused)return;const rect=canvas.getBoundingClientRect(),p={x:event.clientX-rect.left,y:event.clientY-rect.top};
-  let closest=null,distance=Infinity;
-  for(const item of hotspots.values()){if(indoors===['entrance','publish','report'].includes(item.type))continue;const s=screen(...item.position),dx=Math.abs(p.x-s.x),dy=p.y-s.y;const limit=item.type==='video'?120:90;
-   if(dx<limit*zoom&&dy<30*zoom&&dy>-(item.type==='video'?190:160)*zoom){const d=dx+Math.abs(dy+50*zoom)*.5;if(d<distance){distance=d;closest=item;}}}
-  if(closest){if(near?.id===closest.id)interact();else moveTo(closest.id);return;}const world=unscreen(p.x,p.y);route(world.x,world.z);
+ function pointer(event){if(paused)return;const rect=canvas.getBoundingClientRect(),point={x:event.clientX-rect.left,y:event.clientY-rect.top};
+  const definitions={artifact:['case',128],video:['screen',170],external:['screen',108],desk:['desk',150],publish:['desk',150],report:['frame',100]};
+  // Pick the foremost opaque sprite pixel. Its calibrated ground center is
+  // still the movement/interaction destination; tall paper and screens click
+  // correctly without stealing hits from the next exhibit's empty corners.
+  const items=[...hotspots.values()].filter(item=>indoors!==['entrance','publish','report'].includes(item.type)).sort((a,b)=>(b.position[0]+b.position[1])-(a.position[0]+a.position[1]));
+  for(const item of items){
+   const p=screen(...item.position),definition=definitions[item.type];let hit=false;
+   if(!definition)hit=Math.abs(point.x-p.x)<40*zoom&&point.y-p.y<20*zoom&&point.y-p.y> -60*zoom;
+   else{const geometry=sprite(...definition);if(geometry){const x=(point.x-p.x)/zoom-geometry.left,y=(point.y-p.y)/zoom-geometry.top;
+    if(x>=0&&x<geometry.width&&y>=0&&y<geometry.height){try{const context=geometry.image.getContext('2d'),sx=Math.floor(x/geometry.width*geometry.image.width),sy=Math.floor(y/geometry.height*geometry.image.height);hit=context.getImageData(sx,sy,1,1).data[3]>18;}catch{hit=true;}}
+   }}
+   if(hit){if(near?.id===item.id)interact();else moveTo(item.id);return;}
+  }
+  const world=unscreen(point.x,point.y);route(world.x,world.z);
  }
  function keyDown(event){if(paused||/INPUT|TEXTAREA|SELECT/.test(event.target.tagName))return;const key=event.key.toLowerCase();if(key==='f'){event.preventDefault();interact();return;}if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(key)){event.preventDefault();keys[key]=true;waypoints=[];}}
  function keyUp(event){const key=event.key.toLowerCase(),wasMoving=Boolean(keys[key]);delete keys[key];if(wasMoving&&!Object.values(keys).some(Boolean)&&!touch.x&&!touch.y){target={...player};waypoints=[];}}
@@ -223,5 +282,5 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
   const p=project(player.x,player.z),ease=1-Math.exp(-elapsed*8);camera.x+=(p.x-camera.x)*ease;camera.y+=(p.y-camera.y)*ease;paint();
  }
  tick(last);
- return {ready,moveTo,interact,getPosition:()=>({x:player.x,z:player.z,inside:indoors}),teleport(x,z,isInside){indoors=isInside;player={x,z};target={...player};camera=project(x,z);waypoints=[];clearKeys();lastNear=null;near=null;onNear(null);onMove({x,z,inside:indoors});},pause(value){paused=value;keys={};touch={x:0,y:0};if(value){waypoints=[];target={...player};}},setTouch(x,y){const wasMoving=touch.x||touch.y;touch={x,y};if(wasMoving&&!x&&!y&&!Object.values(keys).some(Boolean)){target={...player};waypoints=[];}},zoom(delta){zoom=clamp(zoom-delta*.1,.58,1.8);},setAvatar(nextColor,nextName,nextHair=hair){color=nextColor;name=nextName||'나의 탐험가';hair=nextHair==='bob'?'bob':'short';},updateReports(nextReports){reports=nextReports.slice(0,6);for(const id of [...hotspots.keys()])if(id.startsWith('report-'))hotspots.delete(id);reports.forEach((report,i)=>{const x=17+(i%3)*3.1,z=10+Math.floor(i/3)*3.6,item=hot(`report-${report.id}`,'report',report.title,x,z,{report});const image=new Image();image.onload=()=>{if(!destroyed)item.poster=image;};image.src=report.photos[0];});},dispose(){destroyed=true;cancelAnimationFrame(frame);for(const timer of retryTimers)clearTimeout(timer);retryTimers.clear();observer.disconnect();canvas.removeEventListener('click',pointer);window.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);window.removeEventListener('blur',clearKeys);images.clear();artifactImages.clear();spriteFrames.clear();recolored.clear();rasters.clear();canvas.remove();}};
+ return {ready,moveTo,interact,getPosition:()=>({x:player.x,z:player.z,inside:indoors}),teleport(x,z,isInside){indoors=isInside;player={x,z};target={...player};camera=project(x,z);waypoints=[];clearKeys();lastNear=null;near=null;onNear(null);onMove({x,z,inside:indoors});},pause(value){paused=value;keys={};touch={x:0,y:0};if(value){waypoints=[];target={...player};}},setTouch(x,y){const wasMoving=touch.x||touch.y;touch={x,y};if(wasMoving&&!x&&!y&&!Object.values(keys).some(Boolean)){target={...player};waypoints=[];}},zoom(delta){zoom=clamp(zoom-delta*.1,.58,1.8);},setAvatar(nextColor,nextName,nextHair=hair){color=nextColor;name=nextName||'나의 탐험가';hair=nextHair==='bob'?'bob':'short';},updateReports(nextReports){reports=nextReports.slice(0,6);for(const id of [...hotspots.keys()])if(id.startsWith('report-'))hotspots.delete(id);for(let i=obstacles.length-1;i>=0;i--)if(obstacles[i].report)obstacles.splice(i,1);reports.forEach((report,i)=>{const x=16+(i%3)*4,z=10+Math.floor(i/3)*8,item=hot(`report-${report.id}`,'report',report.title,x,z,{report});obstacles.push({x,z,w:.7,d:.55,room:'outside',report:true});const image=new Image();image.onload=()=>{if(!destroyed){item.poster=image;item.paper=reportPaper(report,image);}};image.src=report.photos[0];});},dispose(){destroyed=true;cancelAnimationFrame(frame);for(const timer of retryTimers)clearTimeout(timer);retryTimers.clear();observer.disconnect();canvas.removeEventListener('click',pointer);window.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);window.removeEventListener('blur',clearKeys);images.clear();artifactImages.clear();spriteFrames.clear();recolored.clear();rasters.clear();spriteRasters.clear();canvas.remove();}};
 }
