@@ -1,47 +1,37 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {getSpriteGeometry,SPRITE_GEOMETRY} from '../src/sprite-geometry.js';
+import * as THREE from 'three';
+import {MAP_CAMERA_DIRECTION,projectMap} from '../src/projection.js';
+import {mapSurfacePoint} from '../src/surface-sprite.js';
 
-const close=(actual,expected)=>assert.ok(Math.abs(actual-expected)<1e-9,`${actual} differs from ${expected}`);
-const assetFor=(metadata,rect)=>({image:{naturalWidth:metadata.size[0],naturalHeight:metadata.size[1]},rect:rect||{x:0,y:0,w:metadata.size[0],h:metadata.size[1]}});
+const close=(actual,expected)=>assert.ok(Math.abs(actual-expected)<1e-8,`${actual} differs from ${expected}`);
 
-test('calibrated ground axes follow the map while walls remain vertical',()=>{
-  for(const [kind,metadata] of Object.entries(SPRITE_GEOMETRY)) {
-    if(!metadata.slopes)continue;
-    const geometry=getSpriteGeometry(kind,assetFor(metadata),300);
-    const [x,y]=metadata.ground,origin=geometry.point(x,y);
-    close(origin.x,0);close(origin.y,0);
-    for(const [slope,targetSlope] of [[metadata.slopes[0],.5],[metadata.slopes[1],-.5]]) {
-      const endpoint=geometry.point(x+100,y+100*slope);
-      close(endpoint.y/endpoint.x,targetSlope);
-    }
-    close(geometry.point(x,y-100).x,0);
+test('the 3D thumbnail camera agrees with both map ground axes',()=>{
+  const eye=new THREE.Vector3(...MAP_CAMERA_DIRECTION).normalize();
+  close(Math.atan2(eye.x,eye.z),Math.PI/4);
+  close(Math.asin(eye.y),Math.PI/6);
+  const right=new THREE.Vector3().crossVectors(new THREE.Vector3(0,1,0),eye).normalize();
+  const up=new THREE.Vector3().crossVectors(eye,right).normalize();
+  for(const [x,z]of [[1,0],[0,1]]){
+    const axis=new THREE.Vector3(x,0,z),map=projectMap(x,z);
+    close(-axis.dot(up)/axis.dot(right),map.y/map.x);
   }
 });
 
-test('sheared crop bounds contain all four source corners and retain ground anchoring',()=>{
-  const metadata=SPRITE_GEOMETRY.case,asset=assetFor(metadata,{x:167,y:18,w:1213,h:1006});
-  const geometry=getSpriteGeometry('case',asset,145),r=asset.rect;
-  const corners=[[r.x,r.y],[r.x+r.w,r.y],[r.x+r.w,r.y+r.h],[r.x,r.y+r.h]].map(p=>geometry.point(...p));
-  close(geometry.width,145);
-  close(Math.min(...corners.map(p=>p.x)),geometry.left);
-  close(Math.max(...corners.map(p=>p.x)),geometry.left+geometry.width);
-  close(Math.min(...corners.map(p=>p.y)),geometry.top);
-  close(Math.max(...corners.map(p=>p.y)),geometry.top+geometry.height);
-  assert.ok(geometry.top<0&&geometry.top+geometry.height>0);
+test('a source face with unequal pillar heights maps to equal-height levels',()=>{
+  // Independent source corners have different top/bottom slopes. One global
+  // affine transformation cannot satisfy this regression fixture.
+  const source=[[214,171],[1033,422],[1031,789],[222,480]];
+  const target=[[-64,-92],[32,-44],[32,0],[-64,-48]];
+  const surfaces=[[0,1,2],[0,2,3]].map(ids=>({source:ids.map(i=>source[i]),target:ids.map(i=>target[i])}));
+  const [a,b,c,d]=source.map(p=>mapSurfacePoint(p,surfaces));
+  close((b[1]-a[1])/(b[0]-a[0]),.5);close((c[1]-d[1])/(c[0]-d[0]),.5);
+  close(d[1]-a[1],44);close(c[1]-b[1],44);close(a[0],d[0]);close(b[0],c[0]);
+  const center=source[0].map((v,i)=>(v+source[2][i])/2),mapped=mapSurfacePoint(center,surfaces);
+  close(mapped[0],(target[0][0]+target[2][0])/2);close(mapped[1],(target[0][1]+target[2][1])/2);
 });
 
-test('already aligned artwork preserves its aspect and a resized source preserves calibration',()=>{
-  const metadata=SPRITE_GEOMETRY.flowers,asset=assetFor(metadata,{x:155,y:141,w:1231,h:811});
-  const geometry=getSpriteGeometry('flowers',asset,104);
-  close(geometry.height,104*811/1231);
-  close(geometry.shear,0);close(geometry.verticalScale,1);
-  const building=SPRITE_GEOMETRY.building;
-  const resized={image:{naturalWidth:768,naturalHeight:256},rect:{x:0,y:0,w:768,h:256}};
-  const resizedGeometry=getSpriteGeometry('building',resized,300);
-  const [x,y]=building.ground;
-  const a=resizedGeometry.point(x/2,y/4);
-  close(a.x,0);close(a.y,0);
-  const end=resizedGeometry.point((x+100)/2,(y+100*building.slopes[0])/4);
-  close(end.y/end.x,.5);
+test('a named collection anchor stays on its scaffold',()=>{
+  assert.deepEqual(mapSurfacePoint([770,574],[],{'770,574':[0,-32]}),[0,-32]);
+  assert.throws(()=>mapSurfacePoint([0,0],[]),/no surface or marker/);
 });

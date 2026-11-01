@@ -1,15 +1,14 @@
 import {artifacts} from './artifacts.js';
 import {artifactSprite} from './artifact-sprites.js';
 import {createSpriteRaster,SPRITE_MARKERS} from './sprite-geometry.js';
+import {TILE_WIDTH as TILE_W,TILE_HEIGHT as TILE_H,projectMap as project} from './projection.js';
 
-const TILE_W=64,TILE_H=32;
 const COLLECTION=[[4,1],[8,1],[4,-3.5],[8,-3.5],[6,-8]];
 const ART={
  building:'/art/museum-building.png',gate:'/art/museum-gate.png',stone:'/art/stone-tile.png',wood:'/art/wood-tile.png',wall:'/art/gallery-wall.png',
  case:'/art/props/display-case.png',tree:'/art/props/tree.png',flowers:'/art/props/flower-planter.png',bench:'/art/props/bench.png',screen:'/art/props/video-screen.png',desk:'/art/props/writing-desk.png',frame:'/art/props/report-frame.png',
  short:'/art/sprites/avatar-short.png',bob:'/art/sprites/avatar-bob.png'
 };
-const project=(x,z)=>({x:(x-z)*TILE_W/2,y:(x+z)*TILE_H/2});
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
 function alphaRect(image,source){
@@ -71,26 +70,40 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
   if(edge){ctx.fillStyle='#6e864c';ctx.beginPath();ctx.moveTo(points[1].x,points[1].y);ctx.lineTo(points[2].x,points[2].y);ctx.lineTo(points[2].x,points[2].y+32*zoom);ctx.lineTo(points[1].x,points[1].y+32*zoom);ctx.closePath();ctx.fill();ctx.fillStyle='#809452';ctx.beginPath();ctx.moveTo(points[2].x,points[2].y);ctx.lineTo(points[3].x,points[3].y);ctx.lineTo(points[3].x,points[3].y+32*zoom);ctx.lineTo(points[2].x,points[2].y+32*zoom);ctx.closePath();ctx.fill();}
   ctx.fillStyle=color;ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fill();
  }
- function raster(key,asset,logicalWidth,logicalHeight){
-  const cacheKey=`${key}:${logicalWidth}:${logicalHeight}`;
-  if(rasters.has(cacheKey))return rasters.get(cacheKey);
-  const r=asset.rect,image=document.createElement('canvas');
-  image.width=Math.min(r.w,Math.max(1,Math.ceil(logicalWidth*1.5)));image.height=Math.min(r.h,Math.max(1,Math.ceil(logicalHeight*1.5)));
-  const context=image.getContext('2d');context.imageSmoothingEnabled=true;context.drawImage(asset.image,r.x,r.y,r.w,r.h,0,0,image.width,image.height);rasters.set(cacheKey,image);return image;
+ function floorMaterial(kind,index){
+  const key=`floor-material:${kind}:${index}`;if(rasters.has(key))return rasters.get(key);
+  const asset=images.get(kind),wood=kind==='wood';
+  // These source parallelograms lie entirely inside individual planks/pavers.
+  // Their generated grain survives; none includes a painted joint or tile rim.
+  const patches=wood?[[850,100],[770,142],[1044,212],[632,432],[1132,562],[852,662]]:[[880,215],[982,232],[1042,412],[742,502],[850,112]];
+  const [cx,cy]=patches[index%patches.length],u=wood?[90,50.4]:[40,20.64],v=wood?[-20,10.6]:[-40,19.28];
+  const rx=asset.image.naturalWidth/1774,ry=asset.image.naturalHeight/887;
+  const ux=u[0]*rx,uy=u[1]*ry,vx=v[0]*rx,vy=v[1]*ry,sourceX=cx*rx-(ux+vx)/2,sourceY=cy*ry-(uy+vy)/2,det=ux*vy-vx*uy;
+  const image=document.createElement('canvas');image.width=wood?128:96;image.height=wood?32:96;const context=image.getContext('2d');
+  context.fillStyle=wood?'#d7ad72':'#eee2c9';context.fillRect(0,0,image.width,image.height);
+  const a=image.width*vy/det,b=-image.height*uy/det,c=-image.width*vx/det,d=image.height*ux/det;
+  context.setTransform(a,b,c,d,-a*sourceX-c*sourceY,-b*sourceX-d*sourceY);context.imageSmoothingEnabled=true;context.drawImage(asset.image,0,0);rasters.set(key,image);return image;
  }
- function floorAtlas(kind,x0,z0,x1,z1,span=1){
-  const asset=images.get(kind);if(!asset)return;
-  const key=`floor:${kind}:${x0}:${z0}:${x1}:${z1}:${span}`;
-  let atlas=rasters.get(key);
+ function floorAtlas(kind,x0,z0,x1,z1){
+  if(!images.has(kind))return;
+  const key=`floor-exact:${kind}:${x0}:${z0}:${x1}:${z1}`;let atlas=rasters.get(key);
   if(!atlas){
-   const left=(x0-z1)*TILE_W/2,top=(x0+z0)*TILE_H/2,right=(x1-z0)*TILE_W/2,bottom=(x1+z1)*TILE_H/2,scale=1;
-   const image=document.createElement('canvas');image.width=Math.ceil((right-left)*scale);image.height=Math.ceil((bottom-top)*scale);
-   const context=image.getContext('2d');context.setTransform(scale,0,0,scale,-left*scale,-top*scale);
-   context.beginPath();[[x0,z0],[x1,z0],[x1,z1],[x0,z1]].forEach(([x,z],i)=>{const p=project(x,z);i?context.lineTo(p.x,p.y):context.moveTo(p.x,p.y);});context.closePath();context.clip();
-   const tile=raster(kind,asset,TILE_W*span,TILE_H*span),w=TILE_W*span,h=TILE_H*span;
-   for(let z=z0+span/2;z<z1;z+=span)for(let x=x0+span/2;x<x1;x+=span){
-    const p=project(x,z);context.drawImage(tile,p.x-w/2-.4,p.y-h/2-.3,w+.8,h+.6);
-    context.strokeStyle=kind==='wood'?'#a98b6040':'#b7b08d40';context.lineWidth=.7;context.beginPath();context.moveTo(p.x,p.y-h/2);context.lineTo(p.x+w/2,p.y);context.lineTo(p.x,p.y+h/2);context.lineTo(p.x-w/2,p.y);context.closePath();context.stroke();
+   const left=(x0-z1)*TILE_W/2,top=(x0+z0)*TILE_H/2,right=(x1-z0)*TILE_W/2,bottom=(x1+z1)*TILE_H/2;
+   const image=document.createElement('canvas');image.width=Math.ceil(right-left);image.height=Math.ceil(bottom-top);const context=image.getContext('2d');context.translate(-left,-top);
+   const outline=[[x0,z0],[x1,z0],[x1,z1],[x0,z1]].map(([x,z])=>project(x,z));
+   context.beginPath();outline.forEach((p,i)=>i?context.lineTo(p.x,p.y):context.moveTo(p.x,p.y));context.closePath();context.clip();context.fillStyle=kind==='wood'?'#b58e5d':'#c8bfa8';context.fill();
+   const wood=kind==='wood',length=wood?2:1,depth=wood?.5:1,count=wood?6:5,inset=.009;
+   // Every visible joint starts as a rectangle in world x/z. Projecting its
+   // corners gives exact +/-0.5 edges at every location and staggered row.
+   for(let row=0,z=z0;z<z1;z+=depth,row++){
+    const offset=(row%2)*length/2;
+    for(let column=0,x=x0-offset;x<x1;x+=length,column++){
+     const seed=(Math.imul(row+1,73856093)^Math.imul(column+1,19349663))>>>0,material=floorMaterial(kind,seed%count);
+     const corners=[[x+inset,z+inset],[x+length-inset,z+inset],[x+length-inset,z+depth-inset],[x+inset,z+depth-inset]].map(([px,pz])=>project(px,pz)),[a,b,,d]=corners;
+     context.save();context.beginPath();corners.forEach((p,i)=>i?context.lineTo(p.x,p.y):context.moveTo(p.x,p.y));context.closePath();context.clip();
+     context.transform((b.x-a.x)/material.width,(b.y-a.y)/material.width,(d.x-a.x)/material.height,(d.y-a.y)/material.height,a.x,a.y);context.imageSmoothingEnabled=true;context.drawImage(material,0,0);context.restore();
+     context.strokeStyle=wood?'#98724088':'#b9b098a6';context.lineWidth=wood?.55:.5;context.beginPath();corners.forEach((p,i)=>i?context.lineTo(p.x,p.y):context.moveTo(p.x,p.y));context.closePath();context.stroke();
+    }
    }
    atlas={image,left,top,width:right-left,height:bottom-top};rasters.set(key,atlas);
   }
@@ -130,9 +143,10 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
   const p=geometry.point(...item.align.point),[x,z]=item.align.at;
   return {...item,x:x-p.x/TILE_W-p.y/TILE_H,z:z-p.y/TILE_H+p.x/TILE_W};
  }
- function drawSprite(kind,x,z,displayWidth,{offsetY=0,alpha=1,mirror=false}={}){
+ function drawSprite(kind,x,z,displayWidth,{offsetY=0,alpha=1,mirror=false,layer='all'}={}){
   const geometry=sprite(kind,displayWidth);if(!geometry)return null;const p=screen(x,z);
-  ctx.save();ctx.globalAlpha=alpha;ctx.imageSmoothingEnabled=false;ctx.translate(p.x,p.y-offsetY*zoom);ctx.scale(mirror?-zoom:zoom,zoom);ctx.drawImage(geometry.image,geometry.left,geometry.top,geometry.width,geometry.height);ctx.restore();return geometry;
+  const image=layer==='back'?(geometry.backImage||geometry.image):layer==='front'?geometry.frontImage:geometry.image;if(!image)return geometry;
+  ctx.save();ctx.globalAlpha=alpha;ctx.imageSmoothingEnabled=false;ctx.translate(p.x,p.y-offsetY*zoom);ctx.scale(mirror?-zoom:zoom,zoom);ctx.drawImage(image,geometry.left,geometry.top,geometry.width,geometry.height);ctx.restore();return geometry;
  }
  function quadPoint(quad,u,v){return {x:(1-v)*((1-u)*quad[0].x+u*quad[1].x)+v*((1-u)*quad[3].x+u*quad[2].x),y:(1-v)*((1-u)*quad[0].y+u*quad[1].y)+v*((1-u)*quad[3].y+u*quad[2].y)};}
  function spriteQuad(kind,x,z,width,points,options={}){return points.map(p=>spritePoint(kind,x,z,width,p,options));}
@@ -162,11 +176,14 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
  function portal(item){const p=screen(...item.position),pulse=.72+Math.sin(performance.now()/550)*.1;ctx.save();ctx.globalAlpha=.5;ctx.fillStyle='#fff8c9';ctx.beginPath();ctx.ellipse(p.x,p.y,38*zoom,17*zoom,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=pulse;ctx.strokeStyle='#dfbf42';ctx.lineWidth=5*zoom;ctx.beginPath();ctx.ellipse(p.x,p.y,29*zoom,13*zoom,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
  function highlight(item,w=1.95,d=1.6){ctx.save();ctx.strokeStyle='#f8dc39';ctx.lineWidth=3*zoom;ctx.shadowColor='#f4d632';ctx.shadowBlur=7*zoom;diamond(item.position[0],item.position[1],w,d);ctx.stroke();ctx.restore();}
  function drawArtifact(item){
-  const [x,z]=item.position,width=128,geometry=sprite('case',width);shadow(x,z,105,28);if(near?.id===item.id)highlight(item,2.8,1.5);drawSprite('case',x,z,width);
+  const [x,z]=item.position,width=128,geometry=sprite('case',width);shadow(x,z,105,28);if(near?.id===item.id)highlight(item,2.8,1.5);drawSprite('case',x,z,width,{layer:'back'});
   const snapshot=artifactImages.get(item.id);
-  if(snapshot&&geometry){const r=snapshot.rect,base=spritePoint('case',x,z,width,SPRITE_MARKERS.case.modelBase),support=geometry.point(...SPRITE_MARKERS.case.modelBase),ceiling=geometry.point(770,225),floor=SPRITE_MARKERS.case.innerFloor.map(p=>geometry.point(...p));
-   const maxHeight=Math.max(1,support.y-ceiling.y-5),maxWidth=Math.min(75,(Math.max(...floor.map(p=>p.x))-Math.min(...floor.map(p=>p.x)))*.72);let h=Math.min(item.artifact.photoPoster?45:60,maxHeight),w=h*r.w/r.h;if(w>maxWidth){h*=maxWidth/w;w=maxWidth;}
-   ctx.save();ctx.imageSmoothingEnabled=true;ctx.drawImage(snapshot.image,r.x,r.y,r.w,r.h,base.x-w*zoom/2,base.y-h*zoom,w*zoom,h*zoom);ctx.restore();}
+  if(snapshot&&geometry&&item.artifact.photoPoster&&geometry.anchors?.photoPanel){const p=screen(x,z),quad=geometry.anchors.photoPanel.map(q=>({x:p.x+q.x*zoom,y:p.y+q.y*zoom}));drawQuadImage(snapshot.image,quad);}
+  else if(snapshot&&geometry){const r=snapshot.rect,base=spritePoint('case',x,z,width,SPRITE_MARKERS.case.modelBase),support=geometry.anchors?.modelBase||geometry.point(...SPRITE_MARKERS.case.modelBase),ceiling=geometry.anchors?.modelCeiling||geometry.point(770,225),floor=geometry.anchors?.innerFloor||SPRITE_MARKERS.case.innerFloor.map(p=>geometry.point(...p));
+   const maxHeight=Math.max(1,support.y-ceiling.y-5),maxWidth=Math.min(75,(Math.max(...floor.map(p=>p.x))-Math.min(...floor.map(p=>p.x)))*.72),anchor=snapshot.image.groundAnchor||{x:r.x+r.w/2,y:r.y+r.h},aboveGround=Math.max(1,anchor.y-r.y);
+   const scale=Math.min(60/aboveGround,maxHeight/aboveGround,maxWidth/r.w),w=r.w*scale,h=r.h*scale;
+   ctx.save();ctx.imageSmoothingEnabled=true;ctx.drawImage(snapshot.image,r.x,r.y,r.w,r.h,base.x-(anchor.x-r.x)*scale*zoom,base.y-(anchor.y-r.y)*scale*zoom,w*zoom,h*zoom);ctx.restore();}
+  drawSprite('case',x,z,width,{layer:'front'});
   plaque(`${item.index+1}. ${item.artifact.name.replace('청자 투각 칠보무늬 향로','칠보무늬 향로')}`,x,z,{offset:-(spriteBottom('case',width)+13),width:150,size:9});
  }
  function drawVideo(item){
@@ -213,7 +230,7 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
   if(!indoors){ctx.save();ctx.globalAlpha=.38;ctx.fillStyle='#fdfbf1';for(const [x,y,w]of [[width*.12,height*.12,180],[width*.87,height*.36,230],[width*.1,height*.8,210]]){ctx.beginPath();ctx.ellipse(x,y,w,45,0,0,Math.PI*2);ctx.fill();}ctx.restore();}}
  function paint(){
   ctx.setTransform(pixelRatio,0,0,pixelRatio,0,0);paintBackground();
-  if(indoors){region(-12,-16,12,4.5,'#baa179');floorAtlas('wood',-12,-16,12,4,4);wallStrip(-12,-16,12,-16);wallStrip(-12,-16,-12,4.5);
+  if(indoors){region(-12,-16,12,4.5,'#baa179');floorAtlas('wood',-12,-16,12,4);wallStrip(-12,-16,12,-16);wallStrip(-12,-16,-12,4.5);
    plaque('먼저 영상을 보고 청자를 만나 보세요',-6,-12,{offset:110,width:290,dark:true,size:12});plaque('고려의 쓰임과 아름다움',6,-13,{offset:105,width:260,dark:true,size:12});
   }else{
    region(-12,-3,28,25,'#9bb477');region(-8,-1,26,24,'#e1d7ad',false);
@@ -225,7 +242,7 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
   const commands=visibleDecor.map(d=>({depth:d.x+d.z,draw:()=>{shadow(d.x,d.z,d.w*.55,23);const geometry=drawSprite(d.kind,d.x,d.z,d.w,{mirror:d.mirror});if(d.label&&geometry)plaque(d.label,d.x,d.z,{offset:-geometry.top+20,width:290,dark:true,size:d.id==='main-building'?15:12});}}));
   for(const item of hotspots.values()){
    const outdoor=['entrance','publish','report'].includes(item.type);if(indoors===outdoor)continue;
-   if(item.type==='entrance'||item.type==='exit'){portal(item);plaque(item.type==='entrance'?'입장하기 · F':'관람 마치기 · F',...item.position,{offset:41,width:155,dark:true});continue;}
+   if(item.type==='entrance'||item.type==='exit'){portal(item);plaque(item.type==='entrance'?'입장하기 · F':'관람 마치기 · F',...item.position,{offset:item.type==='entrance'?-37:41,width:155,dark:true});continue;}
    commands.push({depth:item.position[0]+item.position[1],draw:()=>item.type==='artifact'?drawArtifact(item):item.type==='video'?drawVideo(item):item.type==='external'?drawExternal(item):item.type==='report'?drawReport(item):drawDesk(item)});
   }
   commands.push({depth:player.x+player.z+.12,draw:drawPlayer});commands.sort((a,b)=>a.depth-b.depth);for(const command of commands)command.draw();
@@ -249,8 +266,10 @@ export function createGameWorld(el,{onInteract=()=>{},onNear=()=>{},onMove=()=>{
   for(const item of items){
    const p=screen(...item.position),definition=definitions[item.type];let hit=false;
    if(!definition)hit=Math.abs(point.x-p.x)<40*zoom&&point.y-p.y<20*zoom&&point.y-p.y> -60*zoom;
-   else{const geometry=sprite(...definition);if(geometry){const x=(point.x-p.x)/zoom-geometry.left,y=(point.y-p.y)/zoom-geometry.top;
-    if(x>=0&&x<geometry.width&&y>=0&&y<geometry.height){try{const context=geometry.image.getContext('2d'),sx=Math.floor(x/geometry.width*geometry.image.width),sy=Math.floor(y/geometry.height*geometry.image.height);hit=context.getImageData(sx,sy,1,1).data[3]>18;}catch{hit=true;}}
+   else{const geometry=sprite(...definition);if(geometry){const local={x:(point.x-p.x)/zoom,y:(point.y-p.y)/zoom},polygon=geometry.anchors?.hitPolygon;
+    if(polygon){for(let i=0,j=polygon.length-1;i<polygon.length;j=i++){const a=polygon[i],b=polygon[j];if((a.y>local.y)!==(b.y>local.y)&&local.x<(b.x-a.x)*(local.y-a.y)/(b.y-a.y)+a.x)hit=!hit;}}
+    const x=local.x-geometry.left,y=local.y-geometry.top;
+    if(!polygon&&x>=0&&x<geometry.width&&y>=0&&y<geometry.height){try{const context=geometry.image.getContext('2d'),sx=Math.floor(x/geometry.width*geometry.image.width),sy=Math.floor(y/geometry.height*geometry.image.height);hit=context.getImageData(sx,sy,1,1).data[3]>18;}catch{hit=true;}}
    }}
    if(hit){if(near?.id===item.id)interact();else moveTo(item.id);return;}
   }
