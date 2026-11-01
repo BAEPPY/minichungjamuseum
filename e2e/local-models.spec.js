@@ -11,7 +11,7 @@ test('a native GLB survives reload, a bad replacement preserves it, and removal 
  await page.goto('/favicon.svg');
  await page.evaluate(async()=>{
   const storage=await import('/src/storage.js');
-  // Old prototype placeholders must not count as observation of missing files.
+  // Old prototype placeholders must not count as observing the current collection.
   await storage.put({id:'game-progress',making:[],visited:['stool','ewer'],inside:true,exited:false,profileReady:true,avatarHair:'short',videoCompleted:true,videoId:'YM7FhGcR_5E',position:{x:8,z:2.8,inside:true},avatarName:'원본 자료 탐험가',avatarColor:'#e8cf91'});
  });
  await page.goto('/');
@@ -40,12 +40,16 @@ test('a native GLB survives reload, a bad replacement preserves it, and removal 
   return record?{fileName:record.fileName,bytes:record.blob?.size,isBlob:record.blob instanceof Blob}:null;
  });
 
- await openStool();
- await expect(page.locator('#takePhoto')).toBeDisabled();
- await expect(page.locator('#chooseForReport')).toBeDisabled();
- await expect(page.locator('#objectCanvas iframe')).toHaveCount(0);
- await expect(page.locator('#modelSource')).toContainText('등록 대기');
+ // Migration clears the old generic chair/ewer before either current work is opened.
  await expect(page.locator('#visitProgress')).toHaveText('유물 관찰 0/5');
+ await openStool();
+ await expect(page.locator('#takePhoto')).toBeEnabled({timeout:30000});
+ await expect(page.locator('#chooseForReport')).toBeEnabled();
+ await expect(page.locator('#objectCanvas canvas')).toHaveCount(1);
+ await expect(page.locator('#objectCanvas iframe')).toHaveCount(0);
+ await expect(page.locator('#modelSource')).toContainText(/재현|복원|근사/);
+ await expect(page.locator('#visitProgress')).toHaveText('유물 관찰 1/5');
+ expect(await storedModel()).toBeNull();
  await closeObservation();
 
  await openSettings();
@@ -103,10 +107,13 @@ test('a native GLB survives reload, a bad replacement preserves it, and removal 
  expect(await storedModel()).toBeNull();
  await closeSettings();
  await openStool();
- await expect(page.locator('#takePhoto')).toBeDisabled();
- await expect(page.locator('#chooseForReport')).toBeDisabled();
+ await expect(page.locator('#takePhoto')).toBeEnabled({timeout:30000});
+ await expect(page.locator('#chooseForReport')).toBeEnabled();
+ await expect(page.locator('#objectCanvas canvas')).toHaveCount(1);
  await expect(page.locator('#objectCanvas iframe')).toHaveCount(0);
- await expect(page.locator('#modelSource')).toContainText('등록 대기');
+ await expect(page.locator('#modelSource')).toContainText(/재현|복원|근사/);
+ await expect(page.locator('#modelSource')).not.toContainText(fileName);
+ expect(await page.evaluate(async()=>{const {artifacts}=await import('/src/artifacts.js');return artifacts.find(a=>a.id==='stool').model;})).toBe('/models/celadon-stool-reconstruction.glb');
   // Removing the local file does not invalidate its genuine observation history.
   await expect(page.locator('#visitProgress')).toHaveText('유물 관찰 1/5');
  await expect(page.locator('#photoTray img')).toHaveCount(3);

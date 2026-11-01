@@ -2,19 +2,8 @@ import {test,expect} from '@playwright/test';
 import {installNativeVideoFixture,playNativeVideo,waitForNativeVideoEnd} from './helpers/native-video.js';
 test.setTimeout(150000);
 async function destination(page,id,name){await page.locator('#mapButton').click();await page.locator(`[data-destination="${id}"]`).click();if(name)await expect(page.locator('#nearName')).toHaveText(name);await expect(page.locator('#interactButton')).toBeVisible();}
-async function seedNativeFixtures(page){
- await page.goto('/favicon.svg');
- await page.evaluate(async()=>{
-  const {put}=await import('/src/storage.js');
-  // Only the pending chair uses test geometry. The ewer uses its built-in scan.
-  const response=await fetch('/models/celadon-incense.glb');
-  if(!response.ok)throw new Error('Native model fixture could not be loaded.');
-  const blob=await response.blob();
-  for(const artifactId of ['stool'])await put({id:'native-model-'+artifactId,type:'native-model',artifactId,blob,fileName:'playwright-native-fixture.glb',size:blob.size});
- });
-}
 async function enter(page){
- await installNativeVideoFixture(page);await seedNativeFixtures(page);await page.goto('/');
+ await installNativeVideoFixture(page);await page.goto('/');
  await expect(page.locator('#profileDialog')).toBeVisible();await page.locator('#profileNickname').fill('연꽃탐험가');await page.locator('#profileEnter').click();
  await expect(page.locator('#gameLoading')).toHaveCount(0);await destination(page,'entrance','박물관 입장');await page.keyboard.press('f');await page.locator('#enterGame').click();await expect(page.locator('#locationName')).toContainText('영상관');
 }

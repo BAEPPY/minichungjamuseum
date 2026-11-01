@@ -1,0 +1,54 @@
+{
+  "title": "청자 투각 의자",
+  "sourceKind": "manual-photo-reference-reconstruction",
+  "sourceReference": "User supplied front, back, left, right, top, bottom, underside oblique and later upper oblique screenshots in chat",
+  "sourceImagesAvailableAsFiles": false,
+  "notMeasuredScan": true,
+  "geometry": {
+    "heightRelative": 1.6340000000000001,
+    "maximumDiameterRelative": 1.0420000309305752,
+    "mainOvalLoopCount": 12,
+    "mainRibbonWidthRelative": 0.095,
+    "mainRibbonRadialThicknessRelative": 0.05,
+    "mainRibbonAngularHalfWidthRadians": 0.43,
+    "mainRibbonVerticalHalfHeightRelative": 0.412,
+    "ribbonCrossSectionExponent": 0.9,
+    "loopCountIsInferred": true,
+    "mainBodyHollow": true,
+    "topCentralHoleDiameterRatio": 0.31,
+    "bottomFootOpeningDiameterRatio": 0.71,
+    "openingsAreGeometry": true,
+    "vertices": 71060,
+    "triangles": 141736
+  },
+  "appearance": {
+    "color": "reference procedural olive-grey glaze",
+    "notOriginalPhotoTexture": true,
+    "seatUV": "Planar XY reference glaze mapping, avoiding artificial radial streaks",
+    "roughness": 0.57,
+    "surfaceWeathering": "subtle procedural reference variation; no invented symbols"
+  },
+  "limitations": [
+    "Loop count, hidden weave and fine scroll/petal details are inferred from screenshots.",
+    "No original scan, measured dimensions, surface texture or calibrated cameras were provided.",
+    "Top and foot opening geometry is reconstructed approximately from the supplied views."
+  ],
+  "output": {
+    "file": "celadon-stool-reconstruction.glb",
+    "bytes": 4552800,
+    "sha256": "a18c8d48259a2382ae7e5be7d75f77a739ecc4d51479627bac92b6741b0be578"
+  },
+  "artifactId": "stool",
+  "referenceUrl": "https://www.3dbank.xyz/contents/view_contents.jsp?cuid=2989",
+  "referenceImageCount": 8,
+  "referenceImageOrder": [
+    "front",
+    "back",
+    "left",
+    "right",
+    "top",
+    "bottom",
+    "lower-oblique",
+    "upper-oblique"
+  ]
+}

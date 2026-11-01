@@ -4,19 +4,6 @@ import {installNativeVideoFixture,playNativeVideo,waitForNativeVideoEnd} from '.
 test.setTimeout(120000);
 const VIDEO_ID='YM7FhGcR_5E';
 
-async function seedNativeFixtures(page){
- await page.goto('/favicon.svg');
- await page.evaluate(async()=>{
-  const {put}=await import('/src/storage.js');
-  // The chair still lacks its original file. This fixture exercises its native
-  // controls only; the ewer uses its actual built-in scan and original textures.
-  const response=await fetch('/models/celadon-incense.glb');
-  if(!response.ok)throw new Error('Native model fixture could not be loaded.');
-  const blob=await response.blob();
-  for(const artifactId of ['stool'])await put({id:'native-model-'+artifactId,type:'native-model',artifactId,blob,fileName:'playwright-native-fixture.glb',size:blob.size});
- });
-}
-
 async function jump(page,id,name){
  await page.locator('#mapButton').click();
  await page.locator(`[data-destination="${id}"]`).click();
@@ -28,7 +15,6 @@ async function jump(page,id,name){
 test('nickname entry and actual video completion precede native artifact observation',async({page})=>{
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await installNativeVideoFixture(page);
- await seedNativeFixtures(page);
  await page.goto('/');
  await expect(page.locator('#profileDialog')).toBeVisible();
  await expect(page.locator('#profileEnter')).toBeDisabled();
@@ -47,7 +33,7 @@ test('nickname entry and actual video completion precede native artifact observa
  await page.locator('#enterGame').click();
  await expect(page.locator('#locationName')).toContainText('영상관');
 
- // The map cannot bypass the lesson to reach either supplied or locally stored works.
+ // The map cannot bypass the lesson to reach any built-in museum work.
  await page.locator('#mapButton').click();
  await page.locator('[data-destination="maebyeong"]').click();
  await expect(page.locator('#mapDialog')).toBeVisible();
