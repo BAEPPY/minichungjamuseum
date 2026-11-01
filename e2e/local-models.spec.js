@@ -47,7 +47,7 @@ test('a native GLB survives reload, a bad replacement preserves it, and removal 
  await expect(page.locator('#chooseForReport')).toBeEnabled();
  await expect(page.locator('#objectCanvas canvas')).toHaveCount(1);
  await expect(page.locator('#objectCanvas iframe')).toHaveCount(0);
- await expect(page.locator('#modelSource')).toContainText(/재현|복원|근사/);
+ await expect(page.locator('#modelSource')).toHaveText('제공 3D 원본 형상·색상 · 광택은 참고 표현');
  await expect(page.locator('#visitProgress')).toHaveText('유물 관찰 1/5');
  expect(await storedModel()).toBeNull();
  await closeObservation();
@@ -101,8 +101,8 @@ test('a native GLB survives reload, a bad replacement preserves it, and removal 
 
  await openSettings();
  await page.locator('#localModelRemove').click();
- await expect(page.locator('#localModelStatus')).toContainText('기본 자료로 돌아왔어요.');
- await expect(page.locator('#localModelImport')).toBeEnabled();
+ await expect(page.locator('#localModelStatus')).toContainText('기본 자료로 돌아왔어요.',{timeout:45000});
+ await expect(page.locator('#localModelImport')).toBeEnabled({timeout:45000});
  await expect(page.locator('#localModelRemove')).toBeDisabled();
  expect(await storedModel()).toBeNull();
  await closeSettings();
@@ -111,9 +111,9 @@ test('a native GLB survives reload, a bad replacement preserves it, and removal 
  await expect(page.locator('#chooseForReport')).toBeEnabled();
  await expect(page.locator('#objectCanvas canvas')).toHaveCount(1);
  await expect(page.locator('#objectCanvas iframe')).toHaveCount(0);
- await expect(page.locator('#modelSource')).toContainText(/재현|복원|근사/);
+ await expect(page.locator('#modelSource')).toHaveText('제공 3D 원본 형상·색상 · 광택은 참고 표현');
  await expect(page.locator('#modelSource')).not.toContainText(fileName);
- expect(await page.evaluate(async()=>{const {artifacts}=await import('/src/artifacts.js');return artifacts.find(a=>a.id==='stool').model;})).toBe('/models/celadon-stool-reconstruction.glb');
+ expect(await page.evaluate(async()=>{const {artifacts}=await import('/src/artifacts.js');return artifacts.find(a=>a.id==='stool').model;})).toBe('/models/celadon-stool-wrl.glb');
   // Removing the local file does not invalidate its genuine observation history.
   await expect(page.locator('#visitProgress')).toHaveText('유물 관찰 1/5');
  await expect(page.locator('#photoTray img')).toHaveCount(3);

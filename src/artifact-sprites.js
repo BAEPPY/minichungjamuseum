@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {pottery} from './museum.js';
 import {disposeModel,loadArtifactModel} from './models.js';
 import {MAP_CAMERA_DIRECTION} from './projection.js';
+import {celadonLighting} from './celadon-lighting.js';
 
 // The map is a 2D sprite world. Make one transparent, cached thumbnail from each
 // existing artifact model so the actual supplied objects remain recognizable.
@@ -28,13 +29,13 @@ export function artifactSprite(original){
  if(thumbnails.has(key))return thumbnails.get(key);
  const result=artifact.mapPreview&&(artifact.preferMapPreview||!artifact.model)?loadImage(artifact.mapPreview):!artifact.model&&artifact.photoPoster?loadImage(artifact.photoPoster):artifact.nativePending?modelMarker():new Promise((resolve,reject)=>{
   queue=queue.catch(()=>{}).then(async()=>{
-   let renderer,object;
+   let renderer,object,disposeLighting;
    try{
     renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:true});
     renderer.setSize(384,384,false);renderer.setPixelRatio(1);renderer.setClearColor(0x000000,0);
     renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;
-    const scene=new THREE.Scene();scene.add(new THREE.HemisphereLight(0xfff5e4,0x61775b,2.6));
-    const light=new THREE.DirectionalLight(0xfff4dd,3);light.position.set(-3,7,5);scene.add(light);
+    const scene=new THREE.Scene();disposeLighting=celadonLighting(renderer,scene,artifact);
+    if(!disposeLighting){scene.add(new THREE.HemisphereLight(0xfff5e4,0x61775b,2.6));const light=new THREE.DirectionalLight(0xfff4dd,3);light.position.set(-3,7,5);scene.add(light);}
     object=artifact.model?await loadArtifactModel(artifact,1.7):pottery(artifact);scene.add(object);
     const bounds=new THREE.Box3().setFromObject(object),center=bounds.getCenter(new THREE.Vector3()),size=bounds.getSize(new THREE.Vector3());
     const maximum=Math.max(size.x,size.y,size.z),camera=new THREE.OrthographicCamera(-maximum*.75,maximum*.75,maximum*.75,-maximum*.75,.05,30);
@@ -42,7 +43,7 @@ export function artifactSprite(original){
     const contact=footCenter(object,bounds).project(camera);
     const image=await loadImage(renderer.domElement.toDataURL('image/png'));
     image.groundAnchor={x:(contact.x+1)*192,y:(1-contact.y)*192};resolve(image);
-   }catch(error){reject(error);}finally{if(object)disposeModel(object);if(renderer){renderer.dispose();renderer.forceContextLoss();}}
+   }catch(error){reject(error);}finally{if(object)disposeModel(object);disposeLighting?.();if(renderer){renderer.dispose();renderer.forceContextLoss();}}
   });
  });
  thumbnails.set(key,result);return result;
