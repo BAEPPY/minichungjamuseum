@@ -1,0 +1,9 @@
+{
+  "asset": "japan-peony-cutout.png",
+  "use": "Map-only transparent preview; never used for observation captures or reports.",
+  "sourcePhoto": "/models/japan-peony/2_4.jpg",
+  "sourcePhotoSHA256": "81dddfdef75ca4c73e66f9ea2dfff977ff33af0c4462407e70525160e8af3018",
+  "sourceViewer": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/viewer.html",
+  "processing": "Image editing tool removed the photographic background for a transparent map sprite. This derived preview is not an unmodified original photograph. The 54 original observation JPEGs remain the source for study and captures.",
+  "sha256": "298e8a5646f439204e00098ffddee57e6b405cc64e255111b1db970e99b48964"
+}

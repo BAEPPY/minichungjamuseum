@@ -75,8 +75,9 @@ test('full-screen world: compare three actual vases, record five celadons, publi
  // Require the documented original photographs or a native model for every work.
  await page.goto('/favicon.svg');
  const sourcesReady=await page.evaluate(async()=>{const {comparisonArtifacts}=await import('/src/comparison-artifacts.js');return comparisonArtifacts.every(a=>!a.nativePending&&Boolean(a.model||a.photoView));});
- test.skip(!sourcesReady,'The actual Japanese peony comparison source is not yet registered; no substitute model is used.');
- const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ expect(sourcesReady,'Every comparison exhibit must have its documented original photos or native model.').toBe(true);
+ const errors=[],museumRequests=[];page.on('pageerror',error=>errors.push(error.message));
+ page.on('request',request=>{const url=new URL(request.url());if(url.hostname==='museum.go.kr'||url.hostname.endsWith('.museum.go.kr'))museumRequests.push(request.url());});
  await enter(page);
  await expect(page.locator('video,iframe')).toHaveCount(0);
  await expect(page.locator('#videoDialog,[data-destination="video"]')).toHaveCount(0);
@@ -190,6 +191,7 @@ test('full-screen world: compare three actual vases, record five celadons, publi
  for(const value of [...Object.values(comparisonFeatures),...Object.values(galleryFeatures),excellence,evidence])await expect(page.locator('#readContent')).toContainText(value);
  await expect(page.locator('#readContent a[href="https://creativecommons.org/licenses/by-nc-sa/4.0/"]')).toHaveCount(1);
  await page.screenshot({path:'/workspace/game-shared-report.png'});
+ expect(museumRequests).toEqual([]);
  expect(errors).toEqual([]);
 });
 
