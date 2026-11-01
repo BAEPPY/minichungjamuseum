@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {installNativeVideoFixture,playNativeVideo,waitForNativeVideoEnd} from './helpers/native-video.js';
 
 test.setTimeout(120000);
 const VIDEO_ID='YM7FhGcR_5E';
@@ -7,40 +8,15 @@ async function seedNativeFixtures(page){
  await page.goto('/favicon.svg');
  await page.evaluate(async()=>{
   const {put}=await import('/src/storage.js');
-  // Reuse provided geometry strictly as test data for the two native slots.
-  // This fixture does not claim to depict the selected chair or dragonfish.
+  // The chair still lacks its original file. This fixture exercises its native
+  // controls only; the ewer uses its actual built-in scan and original textures.
   const response=await fetch('/models/celadon-incense.glb');
   if(!response.ok)throw new Error('Native model fixture could not be loaded.');
   const blob=await response.blob();
-  for(const artifactId of ['stool','ewer'])await put({id:'native-model-'+artifactId,type:'native-model',artifactId,blob,fileName:'playwright-native-fixture.glb',size:blob.size});
+  for(const artifactId of ['stool'])await put({id:'native-model-'+artifactId,type:'native-model',artifactId,blob,fileName:'playwright-native-fixture.glb',size:blob.size});
  });
 }
 
-async function installMockYouTube(page){
- await page.addInitScript(()=>{
-  window.__videoPlayers=[];
-  window.YT={
-   PlayerState:{ENDED:0,PLAYING:1,PAUSED:2,BUFFERING:3,CUED:5},
-   Player:class {
-    constructor(mount,options){
-     this.options=options;this.duration=2;this.media=0;this.wall=performance.now();this.state=-1;
-     this.iframe=document.createElement('iframe');this.iframe.src='about:blank';mount.replaceWith(this.iframe);
-     window.__videoPlayers.push(this);window.__videoPlayer=this;
-     queueMicrotask(()=>options.events.onReady({target:this}));
-    }
-    getDuration(){return this.duration;}
-    getCurrentTime(){return Math.min(this.duration,this.media+(this.state===1?(performance.now()-this.wall)/1000:0));}
-    getPlaybackRate(){return 1;}
-    getIframe(){return this.iframe;}
-    emit(state){this.media=this.getCurrentTime();this.wall=performance.now();this.state=state;this.options.events.onStateChange({data:state,target:this});}
-    playVideo(){this.emit(1);}
-    seekTo(time){this.media=time;this.wall=performance.now();}
-    finish(){this.media=this.duration;this.wall=performance.now();this.state=0;this.options.events.onStateChange({data:0,target:this});}
-    destroy(){this.iframe.remove();}
-   }
-  };
- });
-}
 async function jump(page,id,name){
  await page.locator('#mapButton').click();
  await page.locator(`[data-destination="${id}"]`).click();
@@ -51,7 +27,7 @@ async function jump(page,id,name){
 
 test('nickname entry and actual video completion precede native artifact observation',async({page})=>{
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
- await installMockYouTube(page);
+ await installNativeVideoFixture(page);
  await seedNativeFixtures(page);
  await page.goto('/');
  await expect(page.locator('#profileDialog')).toBeVisible();
@@ -86,15 +62,17 @@ test('nickname entry and actual video completion precede native artifact observa
  await page.keyboard.press('f');
  await expect(page.locator('#videoDialog')).toBeVisible();
  await expect(page.locator('#videoHost .video-lesson')).toHaveAttribute('data-state','ready');
- expect(await page.evaluate(()=>window.__videoPlayer.options.videoId)).toBe(VIDEO_ID);
+ await expect(page.locator('#videoHost video')).toHaveAttribute('src','/videos/celadon-inlay.mp4');
+ await expect(page.locator('#videoHost iframe')).toHaveCount(0);
  await expect(page.locator('#videoHost .video-lesson-external')).toHaveAttribute('href',`https://www.youtube.com/watch?v=${VIDEO_ID}`);
  await expect(page.locator('#continueToCollection')).toBeDisabled();
- await page.evaluate(()=>window.__videoPlayer.playVideo());
- // Mock media actually advances through the real sampling intervals. Elapsed
- // playback alone must still leave the gate locked until a true ENDED event.
- await expect.poll(()=>page.locator('#videoHost .video-lesson').getAttribute('data-coverage').then(Number),{timeout:10000}).toBeGreaterThanOrEqual(.9);
+ await playNativeVideo(page);
+ // A real short MP4 advances in the native player. Playback cannot unlock
+ // observation before the media's actual ended event and watched coverage.
  await expect(page.locator('#continueToCollection')).toBeDisabled();
- await page.evaluate(()=>window.__videoPlayer.finish());
+ await waitForNativeVideoEnd(page);
+ expect(await page.locator('#videoHost video').evaluate(video=>video.ended)).toBe(true);
+ expect(Number(await page.locator('#videoHost .video-lesson').getAttribute('data-coverage'))).toBeGreaterThanOrEqual(.9);
  await expect(page.locator('#continueToCollection')).toBeEnabled();
  await expect(page.locator('#makingProgress')).toHaveText('제작 영상 ✓');
  await expect.poll(()=>page.evaluate(async()=>{const {get}=await import('/src/storage.js');const state=await get('game-progress');return {completed:state?.videoCompleted,id:state?.videoId};})).toEqual({completed:true,id:VIDEO_ID});

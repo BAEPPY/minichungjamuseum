@@ -1,0 +1,119 @@
+{
+  "artifactId": "ewer",
+  "title": "청자 어룡형 주전자",
+  "collectionNumber": "개성 2",
+  "source": "User-uploaded gae000002-000-30000.zip; two supplied OBJ/MTL/JPEG scan parts",
+  "referenceUrl": "https://www.museum.go.kr/uploadfile/relic3D/gae000002/gae000002.html",
+  "inputs": [
+    {
+      "file": "gae000002-001-30000.obj",
+      "bytes": 17021598,
+      "sha256": "6786d1f3d854a22f0b452be63fb07392ac793692432fea1af78a45c6ce66a39e"
+    },
+    {
+      "file": "gae000002-001-30000.mtl",
+      "bytes": 149,
+      "sha256": "345acbda174033461245c44e25a3239d504153573d353054080307da5079a8f2"
+    },
+    {
+      "file": "gae000002-001-30000.jpg",
+      "bytes": 12161389,
+      "sha256": "819a71aa27a581a7293baadf693a26251199b00fc55acdeca17c2de72bd1576a"
+    },
+    {
+      "file": "gae000002-002-30000.obj",
+      "bytes": 8683292,
+      "sha256": "ca81bc36b85b343f5394ce66b9f16b15efdc7076857b3bb1463af6e05b2ca8c0"
+    },
+    {
+      "file": "gae000002-002-30000.mtl",
+      "bytes": 149,
+      "sha256": "1054f360e97c5f7c7c1447c9f1e044824566c505173606eeb0308084cd741d70"
+    },
+    {
+      "file": "gae000002-002-30000.jpg",
+      "bytes": 11887521,
+      "sha256": "39bfcf148c5c022391b91edd95238b0684049ec1c1bc50b5cf245239f46c4b50"
+    }
+  ],
+  "parts": [
+    {
+      "name": "gae000002-001-30000",
+      "vertices": 98313,
+      "polygons": 98348,
+      "triangles": 196678,
+      "texture": {
+        "file": "gae000002-001-30000.jpg",
+        "originalDimensions": [
+          8192,
+          8192
+        ],
+        "exportDimensions": [
+          4096,
+          4096
+        ],
+        "jpegQuality": 90
+      }
+    },
+    {
+      "name": "gae000002-002-30000",
+      "vertices": 50783,
+      "polygons": 50781,
+      "triangles": 101562,
+      "texture": {
+        "file": "gae000002-002-30000.jpg",
+        "originalDimensions": [
+          8192,
+          8192
+        ],
+        "exportDimensions": [
+          4096,
+          4096
+        ],
+        "jpegQuality": 90
+      }
+    }
+  ],
+  "conversion": {
+    "blenderVersion": "4.3.2",
+    "sourceUpAxis": "Y",
+    "exportUpAxis": "Y",
+    "originalAssemblyRetained": true,
+    "decimation": false,
+    "sourceBoundsBlenderZUp": {
+      "min": [
+        -69.2122802734375,
+        -126.04071807861328,
+        0.12295456975698471
+      ],
+      "max": [
+        72.7919692993164,
+        98.34112548828125,
+        243.9824981689453
+      ]
+    },
+    "normalization": {
+      "translation": [
+        -1.7898445129394531,
+        13.849796295166016,
+        -122.05272674560547
+      ],
+      "uniformScale": 0.009021586665497822,
+      "largestDimension": 2.2
+    },
+    "material": {
+      "baseColor": "Supplied JPEG scan textures, no reference tint",
+      "metallic": 0,
+      "roughness": 0.57,
+      "note": "PBR roughness is a display setting; it is not a measured surface property."
+    },
+    "repairs": [
+      "MTL map_Kd paths omit leading g; explicitly connected the matching supplied JPEG for each part."
+    ]
+  },
+  "output": {
+    "file": "celadon-ewer.glb",
+    "bytes": 10127892,
+    "sha256": "b1f0d72d42bec9f955a0f67a5370a839c3cf3c206900bebe3edcd258e60948de"
+  }
+}

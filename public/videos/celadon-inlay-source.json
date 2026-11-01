@@ -1,0 +1,51 @@
+{
+  "sourceFileName": "[청자실] 상감청자는 어떻게 만들까？ [YM7FhGcR_5E].mp4",
+  "sourceUrl": "https://www.youtube.com/watch?v=YM7FhGcR_5E",
+  "title": "[청자실] 상감청자는 어떻게 만들까?",
+  "providedBy": "user upload",
+  "sourceBytes": 24440498,
+  "sourceSha256": "2135918e5f221bb8cc3d99b2009e657fcd66ebe61d2d14a507781947a962e81f",
+  "outputFile": "celadon-inlay.mp4",
+  "outputBytes": 24440497,
+  "outputSha256": "f65f476e0b67c4552468e45c91ba3c00519b4bdc9f8b047d2dced39af04940e6",
+  "durationSeconds": 132.260862,
+  "video": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "frameRate": "24000/1001"
+  },
+  "audio": {
+    "codec": "aac",
+    "sampleRate": 44100,
+    "channels": 2
+  },
+  "processing": "Lossless stream copy; MP4 faststart moves the index before media data. No video or audio transcoding.",
+  "streamHashesUnchanged": true,
+  "compressedStreamSha256": [
+    "0,v,SHA256=e09add3955ad2472d20dd36129c573eb630f333eb6fa52ed4ebba5122637a4f3",
+    "1,a,SHA256=0bb78a83e40142061bade0e9a6c1ce645d2ed28c1dd8ebdaff16e98c92396f81"
+  ],
+  "outputAtoms": [
+    {
+      "type": "ftyp",
+      "offset": 0,
+      "bytes": 32
+    },
+    {
+      "type": "moov",
+      "offset": 32,
+      "bytes": 90311
+    },
+    {
+      "type": "free",
+      "offset": 90343,
+      "bytes": 8
+    },
+    {
+      "type": "mdat",
+      "offset": 90351,
+      "bytes": 24350146
+    }
+  ]
+}

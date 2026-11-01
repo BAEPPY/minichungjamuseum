@@ -1,39 +1,27 @@
 import {test,expect} from '@playwright/test';
+import {installNativeVideoFixture,playNativeVideo,waitForNativeVideoEnd} from './helpers/native-video.js';
 test.setTimeout(150000);
 async function destination(page,id,name){await page.locator('#mapButton').click();await page.locator(`[data-destination="${id}"]`).click();if(name)await expect(page.locator('#nearName')).toHaveText(name);await expect(page.locator('#interactButton')).toBeVisible();}
 async function seedNativeFixtures(page){
  await page.goto('/favicon.svg');
  await page.evaluate(async()=>{
   const {put}=await import('/src/storage.js');
-  // This is native-rendering test geometry, not a product replacement model.
+  // Only the pending chair uses test geometry. The ewer uses its built-in scan.
   const response=await fetch('/models/celadon-incense.glb');
   if(!response.ok)throw new Error('Native model fixture could not be loaded.');
   const blob=await response.blob();
-  for(const artifactId of ['stool','ewer'])await put({id:'native-model-'+artifactId,type:'native-model',artifactId,blob,fileName:'playwright-native-fixture.glb',size:blob.size});
- });
-}
-async function mockYouTubePlayback(page){
- await page.addInitScript(()=>{
-  window.YT={Player:class {
-   constructor(mount,options){this.options=options;this.mount=mount;this.started=0;this.ended=false;this.timer=null;window.__museumTestPlayer=this;queueMicrotask(()=>options.events.onReady({target:this}));}
-   getDuration(){return 1;}
-   getCurrentTime(){return this.ended?1:this.started?Math.min(1,(performance.now()-this.started)/1000):0;}
-   getPlaybackRate(){return 1;}
-   getIframe(){return this.mount;}
-   playVideo(){this.started=performance.now();this.ended=false;this.options.events.onStateChange({data:1});this.timer=setTimeout(()=>{this.ended=true;this.options.events.onStateChange({data:0});},1100);}
-   destroy(){clearTimeout(this.timer);}
-  }};
+  for(const artifactId of ['stool'])await put({id:'native-model-'+artifactId,type:'native-model',artifactId,blob,fileName:'playwright-native-fixture.glb',size:blob.size});
  });
 }
 async function enter(page){
- await mockYouTubePlayback(page);await seedNativeFixtures(page);await page.goto('/');
+ await installNativeVideoFixture(page);await seedNativeFixtures(page);await page.goto('/');
  await expect(page.locator('#profileDialog')).toBeVisible();await page.locator('#profileNickname').fill('연꽃탐험가');await page.locator('#profileEnter').click();
  await expect(page.locator('#gameLoading')).toHaveCount(0);await destination(page,'entrance','박물관 입장');await page.keyboard.press('f');await page.locator('#enterGame').click();await expect(page.locator('#locationName')).toContainText('영상관');
 }
 async function watchVideo(page){
  await destination(page,'video','고려청자 제작 영상');await page.keyboard.press('f');
  await expect(page.locator('#videoDialog')).toBeVisible();await expect(page.locator('.video-lesson')).toHaveAttribute('data-state','ready');await expect(page.locator('#continueToCollection')).toBeDisabled();
- await page.evaluate(()=>window.__museumTestPlayer.playVideo());
+ await playNativeVideo(page);await waitForNativeVideoEnd(page);
  await expect(page.locator('#continueToCollection')).toBeEnabled();await expect(page.locator('#makingProgress')).toHaveText('제작 영상 ✓');await page.locator('#continueToCollection').click();
 }
 test('full-screen world: enter, watch the lesson video, observe five objects, make a report, exit and hang it in the yard',async({page})=>{
@@ -51,5 +39,5 @@ test('world movement, location and notes restore after reload without a website 
  await page.keyboard.down('ArrowDown');await page.waitForTimeout(700);await page.keyboard.up('ArrowDown');expect(await page.evaluate(()=>document.documentElement.scrollHeight===innerHeight)).toBeTruthy();await page.screenshot({path:'/workspace/game-collection.png'});
 });
 test('mobile game fills the viewport and supports touch controls and interaction',async({page})=>{
- await page.setViewportSize({width:390,height:844});await mockYouTubePlayback(page);await page.goto('/');await expect(page.locator('#profileDialog')).toBeVisible();await page.locator('#profileNickname').fill('청자탐험가');await page.locator('#profileEnter').click();await expect(page.locator('#gameLoading')).toHaveCount(0);await expect(page.locator('.touch-pad')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth===innerWidth&&document.documentElement.scrollHeight===innerHeight)).toBeTruthy();await destination(page,'entrance','박물관 입장');await page.locator('#interactButton').click();await page.locator('#enterGame').click();await page.screenshot({path:'/workspace/game-mobile.png'});await destination(page,'video','고려청자 제작 영상');await page.locator('#interactButton').click();await expect(page.locator('.video-lesson')).toHaveAttribute('data-state','ready');await page.evaluate(()=>window.__museumTestPlayer.playVideo());await expect(page.locator('#continueToCollection')).toBeEnabled();
+ await page.setViewportSize({width:390,height:844});await installNativeVideoFixture(page);await page.goto('/');await expect(page.locator('#profileDialog')).toBeVisible();await page.locator('#profileNickname').fill('청자탐험가');await page.locator('#profileEnter').click();await expect(page.locator('#gameLoading')).toHaveCount(0);await expect(page.locator('.touch-pad')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth===innerWidth&&document.documentElement.scrollHeight===innerHeight)).toBeTruthy();await destination(page,'entrance','박물관 입장');await page.locator('#interactButton').click();await page.locator('#enterGame').click();await page.screenshot({path:'/workspace/game-mobile.png'});await destination(page,'video','고려청자 제작 영상');await page.locator('#interactButton').click();await expect(page.locator('.video-lesson')).toHaveAttribute('data-state','ready');await playNativeVideo(page);await waitForNativeVideoEnd(page);await expect(page.locator('#continueToCollection')).toBeEnabled();
 });
