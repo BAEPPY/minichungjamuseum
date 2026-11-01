@@ -1,6 +1,28 @@
 import {createHash} from 'node:crypto';
+import {courseSourceCredits,enrichReportSourceCredits} from '../src/course-sources.js';
 const TTL=30*24*60*60;
 const artifactIds=new Set(['maebyeong','ewer','incense','bowl','pillow','stool']);
+const comparisonIds=['compare-peony','compare-yuan','compare-inlay'];
+const featureIds=['pillow','stool','incense','maebyeong','ewer'];
+function record(value){return value!==null&&typeof value==='object'&&!Array.isArray(value);}
+function courseText(value){
+ if(typeof value!=='string'||!value.trim()||value.length>1200||/<\/?[A-Za-z][^>]*>/.test(value))throw Error('비교 관찰 기록을 글로 채워 주세요. 각 항목은 1200자까지 쓸 수 있어요.');
+ return value.trim();
+}
+function courseReport(value){
+ if(!record(value)||!record(value.comparison)||!record(value.comparison.observations)||!record(value.features))throw Error('비교 관찰 보고서 형식을 확인해 주세요.');
+ // Construct only the supported text fields. Client extras cannot add another
+ // image payload, markup object or unbounded record to the stored report.
+ return {
+  comparison:{
+   observations:Object.fromEntries(comparisonIds.map(id=>[id,courseText(value.comparison.observations[id])])),
+   excellence:courseText(value.comparison.excellence),
+   evidence:courseText(value.comparison.evidence)
+  },
+  features:Object.fromEntries(featureIds.map(id=>[id,courseText(value.features[id])])),
+  sourceCredits:courseSourceCredits()
+ };
+}
 export function validateReport(input){
  if(!input||typeof input!=='object')throw Error('올바른 보고서가 아니에요.');
  const report={};
@@ -15,6 +37,7 @@ export function validateReport(input){
  if(!Array.isArray(input.photos)||input.photos.length<1||input.photos.length>3)throw Error('관찰 사진을 1~3장 넣어 주세요.');
  if(input.photos.some(p=>typeof p!=='string'||!/^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/.test(p)||p.length>220000))throw Error('사진 용량이 너무 크거나 지원하지 않는 형식이에요.');
  report.photos=input.photos;
+ if(input.course!==undefined)report.course=courseReport(input.course);
  if(Buffer.byteLength(JSON.stringify(report))>550000)throw Error('사진 용량이 너무 커요. 사진 수를 줄여 주세요.');
  report.createdAt=new Date().toISOString();report.type='report';return report;
 }
@@ -37,7 +60,7 @@ export default async function handler(req,res){
    const cursor=Number(req.query.cursor||0);if(!Number.isInteger(cursor)||cursor<0||cursor>1000)return res.status(400).json({error:'잘못된 페이지 요청이에요.'});
    const ids=await redis(['LRANGE',`${prefix}:index`,cursor,cursor+5]);
    const records=ids.length?await redis(['MGET',...ids.map(id=>`${prefix}:report:${id}`)]):[];
-   return res.status(200).json({reports:records.filter(Boolean).map(r=>JSON.parse(r)),nextCursor:ids.length===6?cursor+6:null});
+   return res.status(200).json({reports:records.filter(Boolean).map(r=>enrichReportSourceCredits(JSON.parse(r))),nextCursor:ids.length===6?cursor+6:null});
   }
   if(!req.headers['content-type']?.startsWith('application/json'))return res.status(415).json({error:'JSON 요청이 필요해요.'});
   if(Number(req.headers['content-length']||0)>600000)return res.status(413).json({error:'사진 용량이 너무 커요.'});

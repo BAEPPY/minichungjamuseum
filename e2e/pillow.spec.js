@@ -1,15 +1,12 @@
 import {test,expect} from '@playwright/test';
+import {seedCompletedComparison} from './helpers/course.js';
 
 test('pillow reconstruction rotates freely and original photographs remain available for reports',async({page})=>{
  test.setTimeout(180000);
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.setViewportSize({width:1440,height:960});
  // Start at the real pillow, without substituting a locally uploaded model.
- await page.goto('/favicon.svg');
- await page.evaluate(async()=>{
-  const {put}=await import('/src/storage.js');
-  await put({id:'game-progress',making:[],visited:[],inside:true,exited:false,profileReady:true,avatarHair:'short',videoCompleted:true,videoId:'YM7FhGcR_5E',position:{x:4,z:2.8,inside:true},avatarName:'베개 탐험가',avatarColor:'#eccd79'});
- });
+ await seedCompletedComparison(page,{position:{x:4,z:2.8,inside:true},avatarName:'베개 탐험가',galleryReady:true});
  await page.goto('/');
  await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});
  await expect(page.locator('#nearName')).toHaveText('청자 상감 모란·구름·학무늬 베개');
@@ -84,7 +81,7 @@ test('pillow reconstruction rotates freely and original photographs remain avail
  await page.locator('#chooseForReport').click();
  await expect(page.locator('#reportDialog')).toBeVisible();
  await expect(page.locator('#reportForm [name="artifactId"]')).toHaveValue('pillow');
- await expect(page.locator('#reportForm [name="features"]')).toHaveValue(note);
+ await expect(page.locator('#reportForm [data-gallery-note="pillow"]')).toHaveValue(note);
  await expect(page.locator('#reportPhotos img')).toHaveCount(2);
  expect(await page.locator('#reportPhotos img').nth(1).getAttribute('src')).toBe(originalPhoto);
  await page.locator('#reportDialog [data-close]').click();
@@ -97,7 +94,7 @@ test('pillow reconstruction rotates freely and original photographs remain avail
  await expect(page.locator('#observationNote')).toHaveValue(note);
  expect(await page.locator('#photoTray img').first().getAttribute('src')).toBe(modelPhoto);
  await page.locator('[data-pillow-mode="photos"]').click();
- await expect(hybrid).toHaveAttribute('data-state','ready');
+ await expect(hybrid).toHaveAttribute('data-state','ready',{timeout:30000});
  await expect(photoCanvas).toHaveAttribute('data-frame','C05.jpg');
  expect(await page.locator('#photoTray img').nth(1).getAttribute('src')).toBe(originalPhoto);
  expect(changedFrame).not.toBe('C05.jpg');

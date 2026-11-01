@@ -1,30 +1,13 @@
 import {test,expect} from '@playwright/test';
+import {seedCompletedComparison} from './helpers/course.js';
 
 test.setTimeout(120000);
 
 test.beforeEach(async({page})=>{
- await page.goto('/favicon.svg');
- await page.evaluate(async()=>{
-  const {put}=await import('/src/storage.js');
-  await put({id:'game-progress',making:[0,1,2,3,4,5],visited:[],inside:true,exited:false,profileReady:true,avatarHair:'short',videoCompleted:true,videoId:'YM7FhGcR_5E',avatarName:'매병 탐험가',avatarColor:'#e8cf91',position:{x:8,z:-1.7,inside:true}});
- });
+ await seedCompletedComparison(page,{position:{x:8,z:-1.7,inside:true},avatarName:'매병 탐험가',galleryReady:true});
 });
 
 async function loadMaebyeongRoom(page){
- await page.goto('/');
- await expect(page.locator('#gameLoading')).toHaveCount(0);
- // Stop the live world's autosave before seeding the isolated test progress.
- await page.goto('/favicon.svg');
- await page.evaluate(async()=>{
-  const {put}=await import('/src/storage.js');
-  await put({
-   id:'game-progress',
-   making:[0,1,2,3,4,5],visited:[],inside:true,exited:false,
-   profileReady:true,avatarHair:'short',videoCompleted:true,videoId:'YM7FhGcR_5E',
-   position:{x:8,z:-1.7,inside:true},
-   avatarName:'매병 탐험가',avatarColor:'#eccd79'
-  });
- });
  await page.goto('/');
  await expect(page.locator('#gameLoading')).toHaveCount(0);
  await expect(page.locator('#nearName')).toHaveText('청자 상감 운학문 매병');
@@ -120,7 +103,7 @@ test('textured maebyeong can be observed, photographed, inserted into a report a
  await page.locator('#chooseForReport').click();
  await expect(page.locator('#reportDialog')).toBeVisible();
  await expect(page.locator('#reportForm [name="artifactId"]')).toHaveValue('maebyeong');
- await expect(page.locator('#reportForm [name="features"]')).toHaveValue('매병의 둥근 어깨와 표면 무늬를 관찰했어요.');
+ await expect(page.locator('#reportForm [data-gallery-note="maebyeong"]')).toHaveValue('매병의 둥근 어깨와 표면 무늬를 관찰했어요.');
  await expect(page.locator('#reportPhotos img')).toHaveCount(1);
  expect(await page.locator('#reportPhotos img').getAttribute('src')).toBe(photo);
  await page.locator('#reportDialog [data-close]').click();

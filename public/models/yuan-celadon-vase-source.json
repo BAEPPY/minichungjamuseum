@@ -1,0 +1,71 @@
+{
+  "artifact": "원나라 시대 청자 병",
+  "sourceKind": "user-provided-museum-scan",
+  "sourceFile": "vase_-_yuan_dynasty_1271-1368.glb",
+  "sourceBytes": 18987024,
+  "sourceSHA256": "44d95ca10854d0e0ce96711e9fd3eb975bab587e9036f5c37cfd905fe3f5cd12",
+  "outputFile": "yuan-celadon-vase.glb",
+  "outputBytes": 7026032,
+  "outputSHA256": "2eba8fec554a358f7d63e6cbc51fe7681bd14e9043e2787e38da77427788ba92",
+  "geometryAndUVsUnchanged": true,
+  "unchangedNonImageBufferViews": [
+    {
+      "bufferView": 0,
+      "bytes": 993348,
+      "sha256": "1c5ffc39c352022061a874cc602eff457155068f10fb042d531b429e5b86e0b5"
+    },
+    {
+      "bufferView": 1,
+      "bytes": 1832960,
+      "sha256": "d65d873fa1f8ebb27f0a4389c5cd8950a1e151eecd5a9ea1a7cb822dbd089244"
+    },
+    {
+      "bufferView": 2,
+      "bytes": 1099776,
+      "sha256": "8d1516422534c0814c6c0a1d151ae00f92b9b90a9df87a4c9707223e6210fbe8"
+    }
+  ],
+  "materialsUnchanged": true,
+  "originalMaterialExtension": "KHR_materials_unlit",
+  "note": "Original museum photo texture has baked appearance and is unlit; do not recolor or synthesize reflective glaze for art-historical comparison.",
+  "texture": {
+    "inputSize": [
+      8192,
+      8192
+    ],
+    "outputSize": [
+      4096,
+      4096
+    ],
+    "originalBytes": 15057675,
+    "outputBytes": 3096687,
+    "sourceSHA256": "c9e212681752691d783564798853c4814c0934f6af8f4cab1ce153c1c9557113",
+    "outputSHA256": "758896ee2d60ef8ac325220888557873e71cc49cd512ba71ecfb47f6737e5f35",
+    "resize": "Lanczos",
+    "JPEGQuality": 90,
+    "JPEGChromaSubsampling": "4:4:4",
+    "changes": "Resolution/encoding only; no repainting, masks, color adjustment, or invented detail"
+  },
+  "credit": {
+    "artist": "Unidentified, Chinese",
+    "period": "Yuan Dynasty (1271–1368)",
+    "title": "Vase",
+    "medium": "stoneware, celadon glaze",
+    "collection": "Art Gallery of Hamilton",
+    "accession": "1976.19.M",
+    "gift": "Gift of Herman H. Levy, 1976",
+    "description": "Longquan stoneware with celadon glaze. The ribbed form and mythical animal handles with rings are derived from a metal original.",
+    "scanBy": "Serena Zena Mak Walk, 2023",
+    "collaboration": "Sari-Sari Xchange: Building Asian Diasporic Community Through Emergent Media",
+    "modelAuthor": "AGH / ArtGalleryofHamilton",
+    "source": "https://sketchfab.com/3d-models/vase-yuan-dynasty-1271-1368-a50b38792b264f18af523dc935dae606",
+    "license": "CC BY-NC-SA 4.0",
+    "licenseURL": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "changesDisclosure": "Web derivative: 8K photograph texture resized to 4K JPEG; geometry, UVs and original unlit material unchanged."
+  },
+  "output": {
+    "file": "yuan-celadon-vase.glb",
+    "bytes": 7026032,
+    "sha256": "2eba8fec554a358f7d63e6cbc51fe7681bd14e9043e2787e38da77427788ba92"
+  }
+}

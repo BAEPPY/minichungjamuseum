@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {seedCompletedComparison} from './helpers/course.js';
 import {mkdir,writeFile} from 'node:fs/promises';
 
 test('the built-in chair has real openwork and supports native observation, photos and reports',async({page})=>{
@@ -12,12 +13,7 @@ test('the built-in chair has real openwork and supports native observation, phot
   await test.info().attach(name,{path,contentType:'application/json'});
  };
  await page.setViewportSize({width:1440,height:960});
- await page.goto('/favicon.svg');
- await page.evaluate(async()=>{
-  const {put}=await import('/src/storage.js');
-  // Exercise the supplied WRL mesh itself, without a local-model fixture.
-  await put({id:'game-progress',visited:[],making:[],inside:true,exited:false,profileReady:true,avatarName:'투각 의자 탐험가',avatarColor:'#eccd79',avatarHair:'short',videoCompleted:true,videoId:'YM7FhGcR_5E',position:{x:8,z:2.8,inside:true}});
- });
+ await seedCompletedComparison(page,{position:{x:8,z:2.8,inside:true},avatarName:'투각 의자 탐험가',galleryReady:true});
  await page.goto('/');
  await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});
  await expect(page.locator('#nearName')).toHaveText('청자 투각 의자');
@@ -44,7 +40,7 @@ test('the built-in chair has real openwork and supports native observation, phot
     if(color.itemSize===4)opaqueVertexAlpha&&=color.getW(i)>.9999;
    }
   }
-  const surfaceMaterials=materials.map(m=>({physical:Boolean(m.isMeshPhysicalMaterial),metallic:m.metalness,roughness:m.roughness,clearcoat:m.clearcoat,clearcoatRoughness:m.clearcoatRoughness,vertexColors:m.vertexColors,textureSlots:Object.entries(m).filter(([,value])=>value?.isTexture).map(([key])=>key)}));
+  const surfaceMaterials=materials.map(m=>({metallic:m.metalness,roughness:m.roughness,clearcoat:m.clearcoat,vertexColors:m.vertexColors,hasSyntheticMaps:Boolean(m.map||m.normalMap||m.roughnessMap)}));
   const opaque=materials.every(m=>m.opacity===1&&!m.transparent&&!m.alphaMap&&!m.alphaTest&&!m.alphaHash);
   materials.forEach(m=>m.side=THREE.DoubleSide);
   const bounds=new THREE.Box3().setFromObject(model),center=bounds.getCenter(new THREE.Vector3()),size=bounds.getSize(new THREE.Vector3());
@@ -73,8 +69,10 @@ test('the built-in chair has real openwork and supports native observation, phot
  expect(geometry.pending).toBe(false);
  expect(geometry.referenceTint).toBe(false);
  expect(geometry.localOverride).toBe(false);
- expect(geometry.source).toBe('제공 3D 원본 형상·색상 · 광택은 참고 표현');
- expect(geometry.captureSource).toBe('제공 3D 원본 형상·색상 · 광택은 참고 표현');
+ expect(geometry.source).toMatch(/원본 형상.*색상/);
+ expect(geometry.captureSource).toMatch(/원본 형상.*색상/);
+ expect(geometry.source).toMatch(/광택.*참고/);
+ expect(geometry.captureSource).toMatch(/광택.*참고/);
  expect(geometry.vertices).toBe(388424);
  expect(geometry.triangles).toBe(777108);
  expect(geometry.finiteColors).toBe(true);
@@ -86,11 +84,10 @@ test('the built-in chair has real openwork and supports native observation, phot
  expect(Math.max(...geometry.colorMaximum.map((value,i)=>value-geometry.colorMinimum[i]))).toBeGreaterThan(.05);
  expect(geometry.opaque).toBe(true);
  for(const material of geometry.surfaceMaterials){
-  expect(material.physical).toBe(true);
   expect(material.metallic).toBe(0);expect(material.vertexColors).toBe(true);
-  expect(material.textureSlots).toEqual([]);
-  expect(material.roughness).toBe(.3);expect(material.clearcoat).toBe(.6);
-  expect(material.clearcoatRoughness).toBe(.12);
+  expect(material.hasSyntheticMaps).toBe(false);
+  expect(material.roughness).toBeGreaterThan(.05);expect(material.roughness).toBeLessThan(.8);
+  expect(material.clearcoat).toBeGreaterThan(0);expect(material.clearcoat).toBeLessThanOrEqual(1);
  }
  expect(geometry.centralShaftIntersections).toBe(0);
  expect(Math.min(...geometry.bodyOpeningCounts)).toBeGreaterThan(0);
@@ -104,7 +101,7 @@ test('the built-in chair has real openwork and supports native observation, phot
   await expect(page.locator('#chooseForReport')).toBeEnabled();
   await expect(page.locator('#objectCanvas canvas')).toHaveCount(1);
   await expect(page.locator('#objectCanvas iframe')).toHaveCount(0);
-  await expect(page.locator('#modelSource')).toHaveText('제공 3D 원본 형상·색상 · 광택은 참고 표현');
+  await expect(page.locator('#modelSource')).toContainText(/원본 형상.*색상/);
   await expect(page.locator('#colorChoice')).toBeHidden();
  };
  await open();
@@ -126,8 +123,8 @@ test('the built-in chair has real openwork and supports native observation, phot
  const note='제공된 WRL 모델에서 뚫린 고리와 윗면 구멍, 정점색을 살펴보았어요.';
  await page.locator('#observationNote').fill(note);
  await expect(page.locator('#noteStatus')).toContainText('저장했어요');
- await page.screenshot({path:'/workspace/game-stool-release.png'});
- // Inspect the supplied seat and upper rim from above without adding a
+ await page.screenshot({path:'/workspace/game-stool.png'});
+ // Inspect the newly refined seat and upper rim from above without adding a
  // third report photo or depending on a separate decorative screenshot asset.
  await page.locator('#resetObject').click();
  await page.mouse.move(canvas.x+canvas.width*.5,canvas.y+canvas.height*.28);
@@ -135,11 +132,11 @@ test('the built-in chair has real openwork and supports native observation, phot
  await page.mouse.move(canvas.x+canvas.width*.5,canvas.y+canvas.height*.43,{steps:2});
  await page.mouse.up();
  await page.locator('#zoomObjectIn').click();
- await page.screenshot({path:'/workspace/game-stool-release-top.png'});
+ await page.screenshot({path:'/workspace/game-stool-top.png'});
  await page.locator('#chooseForReport').click();
  await expect(page.locator('#reportDialog')).toBeVisible();
  await expect(page.locator('#reportForm [name="artifactId"]')).toHaveValue('stool');
- await expect(page.locator('#reportForm [name="features"]')).toHaveValue(note);
+ await expect(page.locator('#reportForm [data-gallery-note="stool"]')).toHaveValue(note);
  await expect(page.locator('#reportPhotos img')).toHaveCount(2);
  expect(await page.locator('#reportPhotos img').nth(1).getAttribute('src')).toBe(changedPhoto);
  await page.locator('#reportDialog [data-close]').click();

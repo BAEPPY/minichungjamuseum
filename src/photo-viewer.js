@@ -1,4 +1,4 @@
-// Static multi-angle photographs extracted from the supplied ObjectVR SWF.
+// Static multi-angle photographs from a documented original source.
 // This viewer never executes Flash or reconstructs/fabricates 3D geometry.
 export function createPhotoViewer(el, artifact) {
   const canvas = document.createElement('canvas');
