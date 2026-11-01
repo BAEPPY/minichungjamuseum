@@ -1,0 +1,88 @@
+import {test,expect} from '@playwright/test';
+import {readFile} from 'node:fs/promises';
+
+test('a local pillow model overrides the hybrid viewer and removal restores original references',async({page})=>{
+ test.setTimeout(210000);
+ const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ // Reuse the published reconstruction only as a file-import plumbing fixture;
+ // this test does not claim that importing it creates a measured original scan.
+ const fixture=await readFile(new URL('../public/models/celadon-pillow-reconstruction.glb',import.meta.url));
+ const fileName='pillow-local-model-fixture.glb';
+ await page.goto('/favicon.svg');
+ await page.evaluate(async()=>{
+  const {put}=await import('/src/storage.js');
+  await put({id:'game-progress',making:[],visited:[],inside:true,exited:false,profileReady:true,avatarHair:'short',videoCompleted:true,videoId:'YM7FhGcR_5E',position:{x:4,z:2.8,inside:true},avatarName:'베개 자료 탐험가',avatarColor:'#eccd79'});
+ });
+ await page.goto('/');
+ await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});
+ await expect(page.locator('#nearName')).toHaveText('청자 상감 모란·구름·학무늬 베개');
+ const openPillow=async()=>{
+  await page.keyboard.press('f');
+  await expect(page.locator('#observationDialog')).toBeVisible();
+  await expect(page.locator('#takePhoto')).toBeEnabled({timeout:45000});
+  await expect(page.locator('#objectCanvas canvas')).toHaveCount(1);
+ };
+ const closePillow=()=>page.locator('#observationDialog [data-close]').first().click();
+ const openSettings=async()=>{
+  await page.locator('#settingsButton').click();
+  await page.locator('#localModelArtifact').selectOption('pillow');
+ };
+ const closeSettings=()=>page.locator('#settingsDialog [data-close]').first().click();
+ await openPillow();
+ await expect(page.locator('.pillow-viewer')).toHaveAttribute('data-mode','model');
+ await page.locator('[data-pillow-mode="photos"]').click();
+ await expect(page.locator('.pillow-viewer')).toHaveAttribute('data-state','ready');
+ await expect(page.locator('#objectCanvas canvas')).toHaveAttribute('data-frame','C05.jpg');
+ await page.locator('#takePhoto').click();
+ await expect(page.locator('#photoTray img')).toHaveCount(1);
+ const originalPhoto=await page.locator('#photoTray img').first().getAttribute('src');
+ const note='원본 사진에서 확인한 베개 무늬 기록은 자료를 바꿔도 보관해요.';
+ await page.locator('#observationNote').fill(note);
+ await expect(page.locator('#noteStatus')).toContainText('저장했어요');
+ await closePillow();
+
+ await openSettings();
+ const chooserPromise=page.waitForEvent('filechooser');
+ await page.locator('#localModelImport').click();
+ await (await chooserPromise).setFiles({name:fileName,mimeType:'model/gltf-binary',buffer:fixture});
+ await expect(page.locator('#localModelStatus')).toContainText(fileName,{timeout:45000});
+ await expect(page.locator('#localModelImport')).toBeEnabled();
+ await expect(page.locator('#localModelRemove')).toBeEnabled();
+ await closeSettings();
+ await openPillow();
+ await expect(page.locator('.pillow-viewer')).toHaveCount(0);
+ await expect(page.locator('[data-pillow-mode]')).toHaveCount(0);
+ await expect(page.locator('#modelSource')).toContainText(fileName);
+ await expect(page.locator('#photoTray img')).toHaveCount(1);
+ await expect(page.locator('#observationNote')).toHaveValue(note);
+ await page.locator('#takePhoto').click();
+ await expect(page.locator('#photoTray img')).toHaveCount(2);
+
+ await page.reload();
+ await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});
+ await openPillow();
+ await expect(page.locator('.pillow-viewer')).toHaveCount(0);
+ await expect(page.locator('#modelSource')).toContainText(fileName);
+ await expect(page.locator('#photoTray img')).toHaveCount(2);
+ await closePillow();
+ await openSettings();
+ await page.locator('#localModelRemove').click();
+ await expect(page.locator('#localModelStatus')).toContainText('기본 자료로 돌아왔어요.');
+ await expect(page.locator('#localModelImport')).toBeEnabled();
+ await expect(page.locator('#localModelRemove')).toBeDisabled();
+ expect(await page.evaluate(async()=>{const {get}=await import('/src/storage.js');return await get('native-model-pillow')??null;})).toBeNull();
+ await closeSettings();
+ await openPillow();
+ await expect(page.locator('.pillow-viewer')).toHaveAttribute('data-mode','model');
+ await expect(page.locator('.pillow-viewer')).toHaveAttribute('data-state','ready');
+ await expect(page.locator('#modelSource')).toContainText(/재현|복원/);
+ await expect(page.locator('#modelSource')).not.toContainText(fileName);
+ await page.locator('[data-pillow-mode="photos"]').click();
+ await expect(page.locator('.pillow-viewer')).toHaveAttribute('data-state','ready');
+ await expect(page.locator('#modelSource')).toContainText('원본 사진');
+ await expect(page.locator('#objectCanvas canvas')).toHaveAttribute('data-frame','C05.jpg');
+ await expect(page.locator('#photoTray img')).toHaveCount(2);
+ expect(await page.locator('#photoTray img').first().getAttribute('src')).toBe(originalPhoto);
+ await expect(page.locator('#observationNote')).toHaveValue(note);
+ expect(errors).toEqual([]);
+});

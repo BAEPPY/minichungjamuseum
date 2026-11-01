@@ -1,0 +1,13 @@
+.pillow-viewer{display:flex;flex-direction:column;width:100%;height:100%;min-height:0;background:#e8e9e0;overflow:hidden}
+.pillow-viewer-modes{display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;justify-content:center;padding:14px 14px 0}
+.pillow-viewer-modes button{border:1px solid #b9c7aa;border-radius:6px;background:#f8faef;color:#496740;padding:8px 13px;font:inherit;font-size:12px;line-height:1.5;cursor:pointer}
+.pillow-viewer-modes button[aria-pressed=true]{background:#486b47;border-color:#486b47;color:#fffef1}
+.pillow-viewer-modes button:focus-visible{outline:3px solid #b19a56;outline-offset:3px}
+.pillow-viewer-modes button:disabled{cursor:default;opacity:.45}
+.pillow-viewer-status{flex-shrink:0;margin:8px 16px 0;font-size:11px;line-height:1.7;text-align:center;color:#617953}
+.pillow-viewer-warning{flex-shrink:0;margin:7px 16px 0;padding:7px 10px;border:1px solid #dfcaa5;border-radius:5px;font-size:11px;line-height:1.7;text-align:center;color:#896135;background:#f8f0dc}
+.pillow-viewer-warning[hidden]{display:none!important}
+.pillow-viewer-viewport{position:relative;flex:1;min-width:0;min-height:0;overflow:hidden}
+.pillow-viewer[data-state=loading] .pillow-viewer-viewport{visibility:hidden;pointer-events:none}
+.pillow-viewer-viewport canvas{display:block;width:100%;height:100%}
+@media(max-width:760px){.pillow-viewer-modes{padding-top:9px}.pillow-viewer-modes button{padding:6px 11px;font-size:11px}.pillow-viewer-status,.pillow-viewer-warning{font-size:10px}.pillow-viewer-status{margin:6px 12px 0}}

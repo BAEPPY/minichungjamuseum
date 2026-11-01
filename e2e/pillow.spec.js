@@ -1,53 +1,105 @@
 import {test,expect} from '@playwright/test';
 
-test('pillow SWF photos: change photographed angle, zoom, capture, insert report and reopen',async({page})=>{
- test.setTimeout(120000);
- const errors=[];page.on('pageerror',e=>errors.push(e.message));
- // Seed just progress before loading the game, so the test starts by the pillow.
+test('pillow reconstruction rotates freely and original photographs remain available for reports',async({page})=>{
+ test.setTimeout(180000);
+ const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.setViewportSize({width:1440,height:960});
+ // Start at the real pillow, without substituting a locally uploaded model.
  await page.goto('/favicon.svg');
  await page.evaluate(async()=>{
-  const storage=await import('/src/storage.js');
-  await storage.put({id:'game-progress',making:[0,1,2,3,4,5],visited:[],inside:true,exited:false,profileReady:true,avatarHair:'short',videoCompleted:true,videoId:'YM7FhGcR_5E',position:{x:4,z:2.8,inside:true},avatarName:'베개 탐험가',avatarColor:'#eccd79'});
+  const {put}=await import('/src/storage.js');
+  await put({id:'game-progress',making:[],visited:[],inside:true,exited:false,profileReady:true,avatarHair:'short',videoCompleted:true,videoId:'YM7FhGcR_5E',position:{x:4,z:2.8,inside:true},avatarName:'베개 탐험가',avatarColor:'#eccd79'});
  });
  await page.goto('/');
- await expect(page.locator('#gameLoading')).toHaveCount(0);
+ await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});
  await expect(page.locator('#nearName')).toHaveText('청자 상감 모란·구름·학무늬 베개');
- await page.keyboard.press('f');
- await expect(page.locator('#observationDialog')).toBeVisible();
- await expect(page.locator('#takePhoto')).toBeEnabled();
- await expect(page.locator('#modelSource')).toContainText('다각도 사진');
- await expect(page.locator('#colorChoice')).toBeHidden();
- const canvas=page.locator('#objectCanvas canvas');
- await expect(canvas).toHaveAttribute('data-frame','C05.jpg');
- const box=await canvas.boundingBox();
- await page.mouse.move(box.x+box.width*.4,box.y+box.height*.5);
+ const hybrid=page.locator('#objectCanvas .pillow-viewer');
+ const open=async()=>{
+  await page.keyboard.press('f');
+  await expect(page.locator('#observationDialog')).toBeVisible();
+  await expect(hybrid).toHaveAttribute('data-mode','model');
+  await expect(hybrid).toHaveAttribute('data-state','ready',{timeout:45000});
+  await expect(page.locator('#takePhoto')).toBeEnabled();
+  await expect(page.locator('#modelSource')).toContainText(/재현|복원/);
+  await expect(page.locator('#colorChoice')).toBeHidden();
+  await expect(page.locator('#objectCanvas canvas')).toHaveCount(1);
+  await expect(page.locator('#objectCanvas iframe')).toHaveCount(0);
+ };
+ await open();
+ await expect(page.locator('[data-pillow-mode="model"]')).toHaveAttribute('aria-pressed','true');
+ const modelCanvas=page.locator('#objectCanvas canvas');
+ const before=await modelCanvas.evaluate(canvas=>canvas.toDataURL('image/png'));
+ const modelBox=await modelCanvas.boundingBox();
+ await page.mouse.move(modelBox.x+modelBox.width*.35,modelBox.y+modelBox.height*.5);
  await page.mouse.down();
- await page.mouse.move(box.x+box.width*.7,box.y+box.height*.5,{steps:8});
+ await page.mouse.move(modelBox.x+modelBox.width*.65,modelBox.y+modelBox.height*.4,{steps:8});
  await page.mouse.up();
- await expect(canvas).not.toHaveAttribute('data-frame','C05.jpg');
- await expect(canvas).toHaveAttribute('data-loading','false');
- const changedFrame=await canvas.getAttribute('data-frame');
  await page.locator('#zoomObjectIn').click();
- await expect.poll(async()=>Number(await canvas.getAttribute('data-zoom'))).toBeGreaterThan(1);
+ await expect.poll(()=>modelCanvas.evaluate(canvas=>canvas.toDataURL('image/png')),{timeout:15000}).not.toBe(before);
  await page.locator('#takePhoto').click();
  await expect(page.locator('#photoTray img')).toHaveCount(1);
- const photo=await page.locator('#photoTray img').getAttribute('src');
- expect(photo).toMatch(/^data:image\/jpeg;base64,/);
- expect(photo.length).toBeGreaterThan(10000);
- await page.locator('#observationNote').fill('베개 윗면에 학과 꽃을 닮은 무늬가 보인다.');
+ const modelPhoto=await page.locator('#photoTray img').first().getAttribute('src');
+ expect(modelPhoto).toMatch(/^data:image\/jpeg;base64,/);
+ await page.screenshot({path:'/workspace/game-pillow-model.png'});
+
+ // Orbit below the pillow to inspect the separately decorated underside.
+ // Keep this a view change only, preserving the two-photo report workflow.
+ const beforeUnderside=await modelCanvas.evaluate(canvas=>canvas.toDataURL('image/png'));
+ await page.mouse.move(modelBox.x+modelBox.width*.5,modelBox.y+modelBox.height*.75);
+ await page.mouse.down();
+ await page.mouse.move(modelBox.x+modelBox.width*.5,modelBox.y+modelBox.height*.25,{steps:12});
+ await page.mouse.up();
+ await expect.poll(()=>modelCanvas.evaluate(canvas=>canvas.toDataURL('image/png')),{timeout:15000}).not.toBe(beforeUnderside);
+ await page.screenshot({path:'/workspace/game-pillow-underside.png'});
+ await page.locator('#resetObject').click();
+
+ await page.locator('[data-pillow-mode="photos"]').click();
+ await expect(hybrid).toHaveAttribute('data-mode','photos');
+ await expect(hybrid).toHaveAttribute('data-state','ready');
+ await expect(page.locator('#takePhoto')).toBeEnabled();
+ await expect(page.locator('#modelSource')).toContainText('원본 사진');
+ await expect(page.locator('[data-pillow-mode="photos"]')).toHaveAttribute('aria-pressed','true');
+ const photoCanvas=page.locator('#objectCanvas canvas');
+ await expect(photoCanvas).toHaveAttribute('data-frame','C05.jpg');
+ const photoBox=await photoCanvas.boundingBox();
+ await page.mouse.move(photoBox.x+photoBox.width*.4,photoBox.y+photoBox.height*.5);
+ await page.mouse.down();
+ await page.mouse.move(photoBox.x+photoBox.width*.7,photoBox.y+photoBox.height*.5,{steps:8});
+ await page.mouse.up();
+ await expect(photoCanvas).not.toHaveAttribute('data-frame','C05.jpg');
+ await expect(photoCanvas).toHaveAttribute('data-loading','false');
+ const changedFrame=await photoCanvas.getAttribute('data-frame');
+ await page.locator('#zoomObjectIn').click();
+ await expect.poll(()=>photoCanvas.getAttribute('data-zoom').then(Number)).toBeGreaterThan(1);
+ await page.locator('#takePhoto').click();
+ await expect(page.locator('#photoTray img')).toHaveCount(2);
+ const originalPhoto=await page.locator('#photoTray img').nth(1).getAttribute('src');
+ expect(originalPhoto).toMatch(/^data:image\/jpeg;base64,/);
+ expect(originalPhoto.length).toBeGreaterThan(10000);
+ expect(originalPhoto).not.toBe(modelPhoto);
+ const note='3D로 전체 모양을 돌려 보고 원본 사진에서 학과 꽃 무늬를 확인했어요.';
+ await page.locator('#observationNote').fill(note);
  await expect(page.locator('#noteStatus')).toContainText('저장했어요');
  await page.screenshot({path:'/workspace/game-pillow-photos.png'});
  await page.locator('#chooseForReport').click();
  await expect(page.locator('#reportDialog')).toBeVisible();
  await expect(page.locator('#reportForm [name="artifactId"]')).toHaveValue('pillow');
- await expect(page.locator('#reportForm [name="features"]')).toHaveValue('베개 윗면에 학과 꽃을 닮은 무늬가 보인다.');
- await expect(page.locator('#reportPhotos img')).toHaveCount(1);
+ await expect(page.locator('#reportForm [name="features"]')).toHaveValue(note);
+ await expect(page.locator('#reportPhotos img')).toHaveCount(2);
+ expect(await page.locator('#reportPhotos img').nth(1).getAttribute('src')).toBe(originalPhoto);
  await page.locator('#reportDialog [data-close]').click();
- await page.keyboard.press('f');
- await expect(page.locator('#takePhoto')).toBeEnabled();
- await expect(page.locator('#objectCanvas canvas')).toHaveAttribute('data-frame','C05.jpg');
- await expect(page.locator('#photoTray img')).toHaveCount(1);
- await expect(page.locator('#observationNote')).toHaveValue('베개 윗면에 학과 꽃을 닮은 무늬가 보인다.');
+
+ await page.reload();
+ await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});
+ await expect(page.locator('#nearName')).toHaveText('청자 상감 모란·구름·학무늬 베개');
+ await open();
+ await expect(page.locator('#photoTray img')).toHaveCount(2);
+ await expect(page.locator('#observationNote')).toHaveValue(note);
+ expect(await page.locator('#photoTray img').first().getAttribute('src')).toBe(modelPhoto);
+ await page.locator('[data-pillow-mode="photos"]').click();
+ await expect(hybrid).toHaveAttribute('data-state','ready');
+ await expect(photoCanvas).toHaveAttribute('data-frame','C05.jpg');
+ expect(await page.locator('#photoTray img').nth(1).getAttribute('src')).toBe(originalPhoto);
  expect(changedFrame).not.toBe('C05.jpg');
  expect(errors).toEqual([]);
 });

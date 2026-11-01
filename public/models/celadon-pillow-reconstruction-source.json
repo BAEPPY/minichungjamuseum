@@ -1,0 +1,669 @@
+{
+  "type": "photo-based-3D-reconstruction-with-documented-display-corrections",
+  "sourcePhotosUnchanged": true,
+  "originalPhotosVerified": 54,
+  "registeredSourcePhotos": [
+    {
+      "file": "A01.jpg",
+      "sha256": "c2ee6ab20051b390f86ce20865c1aa39110ecf8d0b359d94c70baae0c7c3ba16",
+      "bytes": 169937
+    },
+    {
+      "file": "A02.jpg",
+      "sha256": "bd4583c24d5297851ca167decfef5de5569513908d31ae0f47f9d625765c1371",
+      "bytes": 161025
+    },
+    {
+      "file": "A03.jpg",
+      "sha256": "667d4d2ede55ad07af5a0a13451d5b66303f2a39642ae98e31a36020593c6d5d",
+      "bytes": 155453
+    },
+    {
+      "file": "A04.jpg",
+      "sha256": "82c9c836d53e09f68e5ddf9793144cea9ae17217a0e90320a87baab73689f037",
+      "bytes": 155375
+    },
+    {
+      "file": "A05.jpg",
+      "sha256": "2d852f913f51be936c9ddf8dceecd29df32ee0ca2a3d188d2ff460cc9a47925a",
+      "bytes": 151977
+    },
+    {
+      "file": "A06.jpg",
+      "sha256": "3c3726ed226dbb593a488b75cbf60219ba2fc37bca29996d18cea3e404175ed4",
+      "bytes": 153714
+    },
+    {
+      "file": "A07.jpg",
+      "sha256": "2e13fa25d72c55aa05fb3fc7a06a24b638e5d7356bbed08c90e85c4bdf047c04",
+      "bytes": 157089
+    },
+    {
+      "file": "A08.jpg",
+      "sha256": "acbebcd005f1d0f66d92dfbe41fe35736f8d103363dfd3285bd0462edbc68230",
+      "bytes": 155194
+    },
+    {
+      "file": "A09.jpg",
+      "sha256": "1a48dd59a9514c29e9d309457062a7d2885d18c7e6ca56648ff79f4a1f282690",
+      "bytes": 155301
+    },
+    {
+      "file": "B01.jpg",
+      "sha256": "ea5466af4fde7d8105b91f5ea04382d8aebf0c22f450f03cc4358164671bc3e6",
+      "bytes": 164045
+    },
+    {
+      "file": "B02.jpg",
+      "sha256": "6564fc312dfd51f70e000a4dac7ee12824cb1a8a32f148ffe4f580b4ff74b6a2",
+      "bytes": 211978
+    },
+    {
+      "file": "B03.jpg",
+      "sha256": "17ad27c14bc478c0075346192291ff7741c7dcc223e4e08d722bdce74cf25b90",
+      "bytes": 151724
+    },
+    {
+      "file": "B04.jpg",
+      "sha256": "3679b4ec5526d5fd6296eb05166e5d0db32ff2880568ea5d87746c83158418f3",
+      "bytes": 208124
+    },
+    {
+      "file": "B05.jpg",
+      "sha256": "1d43d51e7f24d65f19a3cce379f32b1e4101abbe7223148bf5b4426b3201a41a",
+      "bytes": 167375
+    },
+    {
+      "file": "B06.jpg",
+      "sha256": "4472f5a13fe44b22060d5cd6c668466a82cb445d28c5bfc16183e009886fae23",
+      "bytes": 200206
+    },
+    {
+      "file": "B07.jpg",
+      "sha256": "a18e8ecaa06bcd0f3684b42da51853c3acd29c5852e7aeb0cfbebb9cca15ac0a",
+      "bytes": 155554
+    },
+    {
+      "file": "B08.jpg",
+      "sha256": "5e7d21ed4af2c08e61b810f1918b70315684a492134ef76648566b97e607b28b",
+      "bytes": 153644
+    },
+    {
+      "file": "B09.jpg",
+      "sha256": "7fcc8c6f785a42d7d0bd69ad795dc08936a15bc72428fd73a5ba72c7ea3c6114",
+      "bytes": 220430
+    },
+    {
+      "file": "C01.jpg",
+      "sha256": "53de35300fd21b4eee9968eacba3444e8357b9f0c7c20ef984401d2a30f2ec6f",
+      "bytes": 145671
+    },
+    {
+      "file": "C02.jpg",
+      "sha256": "8c4974aad936fcbdf0a4ea79043aa225aa8f2311a9d60abeddb06e8b81d23597",
+      "bytes": 173893
+    },
+    {
+      "file": "C03.jpg",
+      "sha256": "56cf29dbb363e080659db458c2b1535c2a8d6fc9a10f41011a4240d0b7f3a01c",
+      "bytes": 163989
+    },
+    {
+      "file": "C04.jpg",
+      "sha256": "03ac70121d42a42f1f42ac89f771fe821b2d1cab0d4192b34b2763ef1f6413ed",
+      "bytes": 158260
+    },
+    {
+      "file": "C05.jpg",
+      "sha256": "5e0a9cababa6fdf5e2ec99b39f1c872be0b4e54e6f308ed620894fbbb478c14d",
+      "bytes": 177185
+    },
+    {
+      "file": "C06.jpg",
+      "sha256": "b0a9315e8042d1215c28a7340c8fec23890f0917c774617a2c7b4a51477549b2",
+      "bytes": 168380
+    },
+    {
+      "file": "C07.jpg",
+      "sha256": "8d0aa2e64b3b9dac56899007cef32443117c147dbb7ce841bda6be8dc9f02e03",
+      "bytes": 166886
+    },
+    {
+      "file": "C08.jpg",
+      "sha256": "3d8e38156977362da5cff973801aeb1245c41908ba870c403e9d334219acf138",
+      "bytes": 171267
+    },
+    {
+      "file": "C09.jpg",
+      "sha256": "7bc85c5050aa6df0aba318db779db409b08925309fdd27d9af3b732918025f40",
+      "bytes": 169522
+    },
+    {
+      "file": "D01.jpg",
+      "sha256": "ddcd206e04f958995213b81fd496febc318ba10d15926de12160c4cd5ed3340b",
+      "bytes": 142673
+    },
+    {
+      "file": "D02.jpg",
+      "sha256": "cbee0a8dafdb549fafef2d7851c9e92e9261fee9d0294b711950b4cbbf1999ef",
+      "bytes": 145199
+    },
+    {
+      "file": "D03.jpg",
+      "sha256": "0c6a4716141564b2638d618713e4e4590f6f672a76d06b1f18e5f5b6e6f7d1bb",
+      "bytes": 126461
+    },
+    {
+      "file": "D04.jpg",
+      "sha256": "6e0b5dad6ead524b87e3c225956a0fdf799a638616de53963b7f5dce5b5775a2",
+      "bytes": 145432
+    },
+    {
+      "file": "D05.jpg",
+      "sha256": "40082f8d88c89e0a4db80d77bca760f732d85651a27b5adabfb3e26f4f922ab7",
+      "bytes": 155198
+    },
+    {
+      "file": "D06.jpg",
+      "sha256": "464b7d15b099024367278ef485c22f613720b75d7e97789a84dec6e3f1783fa6",
+      "bytes": 154761
+    },
+    {
+      "file": "D07.jpg",
+      "sha256": "1f8ec4c2c9cc25accb68e7a18210abae665baa0cf40e415df2abaf61bb552395",
+      "bytes": 135122
+    },
+    {
+      "file": "D08.jpg",
+      "sha256": "6c6f1ce97b394a68f8b8e75e7be09416e4f53fcc1edfcf1d15b621b98b35cc46",
+      "bytes": 122557
+    },
+    {
+      "file": "D09.jpg",
+      "sha256": "0993e6e4dd61c291742fef79e6545724cbc0cb03930b3390709fde6f12f0e705",
+      "bytes": 146902
+    },
+    {
+      "file": "E01.jpg",
+      "sha256": "6f4220c9ee818e9cfd33e0fc600ab3c1148cd36833dbda84f6b28db6efcaea4b",
+      "bytes": 129404
+    },
+    {
+      "file": "E02.jpg",
+      "sha256": "bcaaf4cf6f866abdd6296b4d84ec2d4c35d5a78f23b74f24ef4524ca5e0a70fe",
+      "bytes": 124321
+    },
+    {
+      "file": "E03.jpg",
+      "sha256": "abccee7f65804fcf64b94c7c8ae357fdc4805fba3129a39ef667be7bbcefc8c7",
+      "bytes": 100406
+    },
+    {
+      "file": "E04.jpg",
+      "sha256": "6205e9e009866c173142734118f7f9f1a7c5d478cf396beeacfdf2d4c85dded8",
+      "bytes": 117102
+    },
+    {
+      "file": "E05.jpg",
+      "sha256": "bd112e674d7f80efc7ec4db1762ebbfe748ef4883f0e6d1ddec11d149b44ce1b",
+      "bytes": 130323
+    },
+    {
+      "file": "E06.jpg",
+      "sha256": "ac426492d5adbe15867c4c6f3dacaed31b4b7dfc6c8710d2d9991ec15b56b49d",
+      "bytes": 134778
+    },
+    {
+      "file": "E07.jpg",
+      "sha256": "f31016d5e55c0cb5c138e065ed444a9748793dda9ec9aba5b4bfcd279743e40e",
+      "bytes": 109799
+    },
+    {
+      "file": "E08.jpg",
+      "sha256": "69de2c11f4b2e349f80f5c23396b2a8d2d4e4f662255a6fe192336e18ec15e31",
+      "bytes": 99175
+    },
+    {
+      "file": "E09.jpg",
+      "sha256": "939105af690120242a32b5aa3e64d72d4c87c102f22d9008d1a46bb18c079f95",
+      "bytes": 123902
+    }
+  ],
+  "excludedRows": {
+    "F": "Special separateface/underside-likeimagegroup; not assumedcalibratedwithA–E"
+  },
+  "sparseReconstruction": {
+    "id": 1,
+    "images": 45,
+    "points3D": 12431,
+    "mean_reprojection_error": 0.958560469079695,
+    "mean_track_length": 6.11053012629716,
+    "image_names": [
+      "A04.jpg",
+      "A08.jpg",
+      "A09.jpg",
+      "B02.jpg",
+      "A03.jpg",
+      "A02.jpg",
+      "A07.jpg",
+      "A06.jpg",
+      "A01.jpg",
+      "B01.jpg",
+      "A05.jpg",
+      "B03.jpg",
+      "B07.jpg",
+      "B09.jpg",
+      "B05.jpg",
+      "C02.jpg",
+      "B04.jpg",
+      "C03.jpg",
+      "B06.jpg",
+      "B08.jpg",
+      "C04.jpg",
+      "C01.jpg",
+      "C05.jpg",
+      "C08.jpg",
+      "C06.jpg",
+      "D02.jpg",
+      "D04.jpg",
+      "D05.jpg",
+      "C07.jpg",
+      "C09.jpg",
+      "D01.jpg",
+      "D06.jpg",
+      "D07.jpg",
+      "D03.jpg",
+      "D09.jpg",
+      "D08.jpg",
+      "E05.jpg",
+      "E04.jpg",
+      "E07.jpg",
+      "E08.jpg",
+      "E01.jpg",
+      "E02.jpg",
+      "E03.jpg",
+      "E06.jpg",
+      "E09.jpg"
+    ]
+  },
+  "intrinsics": "Jointly estimated single SIMPLE_PINHOLE sharedcamera; recovered-cameras.json holdsK/extrinsics. Physicalscaleunknown.",
+  "meshing": {
+    "input_sfm_points": 12431,
+    "track_error_filtered": 11252,
+    "outlier_filtered_cloud_points": 11128,
+    "normal_neighbor_count": 24,
+    "normal_orientation": "Toward average view direction of actual observing cameras from SfM tracks",
+    "median_normal_planarity": 0.006189763655104642,
+    "meshing": "Screened Poisson depth8; surface inferred from sparse photo feature points, not measured scan",
+    "world_coordinates_retained": true,
+    "vertices": 29719,
+    "faces": 59434,
+    "bounds": {
+      "min": [
+        0.152626801171461,
+        -0.6619017497833939,
+        2.319282027313292
+      ],
+      "max": [
+        0.7825477421751323,
+        0.06419719522860867,
+        2.7695214236560552
+      ]
+    },
+    "seconds": 1.4232337474822998,
+    "limitations": [
+      "Unobserved bottom is inferred by Poisson, not recovered from photos.",
+      "Fine recesses/through holes may be smoothed or sealed by sparse reconstruction.",
+      "No known physical scale."
+    ]
+  },
+  "trimming": {
+    "source": "actual-poisson.ply inferred from45photoSfM; worldcoordinatesunchanged",
+    "upVectorFromRecoveredCameras": [
+      -0.16231123412484721,
+      0.11710907235619523,
+      -0.9797655476943148
+    ],
+    "planeEquation": "dot(worldXYZ,upVector) = trimHeight",
+    "trimHeight": -2.6919567140786183,
+    "planeOrigin": [
+      0.436934816472769,
+      -0.31525255360877846,
+      2.6374864443386254
+    ],
+    "trimRule": "Keep positive side of plane; trim at1st percentile of track>=3,error<=2.5px pointheight minus0.003",
+    "unsupportedBottomCap": true,
+    "capFaceCount": 597,
+    "capVertexCount": 599,
+    "capColorRGBA": [
+      170,
+      170,
+      164,
+      255
+    ],
+    "smoothing": {
+      "type": "Taubin",
+      "steps": 3,
+      "lambda": 0.3,
+      "mu": -0.31,
+      "meanDisplacement": 0.0004270671508161292,
+      "maxDisplacement": 0.005087690345023272
+    },
+    "vertices": 28665,
+    "faces": 57326,
+    "watertight": true,
+    "limitations": [
+      "Intermediate trim stage: bottom closure geometry is inferred. The final F01 photo projection does not make that geometry measured.",
+      "End holes are not guaranteed recovered and need explicit photo-evidence-based repair if required.",
+      "Photographic reconstruction, not a measured scan; physicalscaleunknown."
+    ]
+  },
+  "sourcePhotoAttribution": "User supplied SWF extractedoriginalJPEGs; museumreferenceURLinapp",
+  "title": "청자 상감 모란·구름·학무늬 베개",
+  "displayLabel": "사진 기반 3D 복원 · 밑면 등 일부 형상 추정·보정 (실측 스캔 아님)",
+  "displayModel": {
+    "inputMesh": "scripts/data/pillow-reconstruction-inputs.zip:actual-poisson-trimmed.ply",
+    "source": "45 original photos with COLMAP recovered camera poses",
+    "notMeasuredScan": true,
+    "notDensePhotogrammetry": true,
+    "vertices": 37312,
+    "triangles": 74624,
+    "photoAssignedFaces": 56436,
+    "neutralFaces": 15451,
+    "backgroundProjectionCorrection": {
+      "method": "Clamp texture UV samples outside precise original-photo foreground masks to nearest eroded ceramic pixel; original JPEGs unchanged",
+      "maskPhotos": [
+        "E01.jpg",
+        "E03.jpg",
+        "E05.jpg",
+        "E06.jpg",
+        "E08.jpg"
+      ],
+      "maximumAcceptedUVShiftPixels": 20,
+      "correctedLoopSamples": 1622,
+      "maxRequestedShiftPixels": 15.943039256558224
+    },
+    "lowerClosureCorrection": {
+      "capSubdivisionCuts": 4,
+      "originalPhoto": "E01.jpg",
+      "manuallyAnnotatedPixels": [
+        [
+          320,
+          872
+        ],
+        [
+          400,
+          865
+        ],
+        [
+          500,
+          850
+        ],
+        [
+          600,
+          840
+        ],
+        [
+          700,
+          832
+        ],
+        [
+          800,
+          829
+        ],
+        [
+          900,
+          834
+        ],
+        [
+          1000,
+          846
+        ],
+        [
+          1100,
+          862
+        ],
+        [
+          1220,
+          874
+        ]
+      ],
+      "fitPolynomial": [
+        -0.40289379380327367,
+        -0.01970982505514343,
+        -2.6728388598235577
+      ],
+      "worldCoordinatesRetained": true,
+      "approximateRegion": true
+    },
+    "endHoleCorrection": {
+      "centerWorld": [
+        0.4646468758583069,
+        -0.3072429895401001,
+        2.514828681945801
+      ],
+      "axisWorld": [
+        0.5017546798521099,
+        -0.8446995371143862,
+        -0.18634627242112595
+      ],
+      "radiusWorld": 0.03693959618061041,
+      "approximateInterior": true
+    },
+    "worldToDisplayBasis": [
+      [
+        -0.4864228357520084,
+        0.8585149318071549,
+        -0.16231123412484721
+      ],
+      [
+        0.8544066590444204,
+        0.5062358404463507,
+        0.1171090723561952
+      ],
+      [
+        0.18270765128895455,
+        -0.0817152722061998,
+        -0.9797655476943148
+      ]
+    ],
+    "sourceBoundsAligned": {
+      "min": [
+        -0.35143816515579246,
+        -0.1291248615397685,
+        -2.6919571220796317
+      ],
+      "max": [
+        0.295594034558333,
+        0.21424679831475915,
+        -2.4411669508790634
+      ]
+    },
+    "normalizationScale": 3.4001399018039806,
+    "limitations": [
+      "The surface is inferred from sparse photograph features, not a measured or dense 3D scan.",
+      "Lower closure shape and internal bore are inferred and corrected; F01 underside UV is manually fitted, not SfM registered.",
+      "All visible motifs come from the same original SWF photographs; original photographs remain authoritative references.",
+      "Photographic highlights and minor texture seams may remain."
+    ],
+    "finalTriangles": 74333,
+    "finalNormals": 68883,
+    "materials": 2,
+    "embeddedImages": [
+      {
+        "dimensions": [
+          4096,
+          4096
+        ],
+        "mimeType": "image/jpeg",
+        "sha256": "3da1ef46ab782274207f0a029d1d96dbc3f21b0ae767d8ff1bf942e17870e656",
+        "bytes": 1758227
+      },
+      {
+        "dimensions": [
+          1535,
+          1183
+        ],
+        "mimeType": "image/jpeg",
+        "sha256": "da93fee91d2c5964130d7306a2daa2860ae51408c4f000af63d1c9fcbf40cca6",
+        "bytes": 150115
+      }
+    ],
+    "normalCleanup": {
+      "removedFacesBelowArea1e_10": 291,
+      "analyticNeutralClosureNormals": true,
+      "closureFaceCount": 15481,
+      "note": "Analytic downward normals/material apply only to geometrically downward closure faces. Rounded side faces keep original body photo UVs and automatic normals.",
+      "restoredRoundedSideFaces": 1331,
+      "capGeometricNormalZThreshold": -0.65,
+      "closureHeightToleranceWorld": 0.002
+    },
+    "underfaceProjection": {
+      "sourcePhoto": "F01.jpg",
+      "sourceSha256": "da93fee91d2c5964130d7306a2daa2860ae51408c4f000af63d1c9fcbf40cca6",
+      "sameOriginalSWF": true,
+      "sfmRegistered": false,
+      "geometry": "Inferred curved lower closure; body geometry remains unchanged",
+      "uvFit": "Manual silhouette fit into the actual original F01 photograph, not a recovered camera",
+      "pixelU": "770+460*t",
+      "pixelTop": "355+60*(1-t*t)",
+      "pixelBottom": "824-64*(1-t*t)",
+      "normalizedWidthProfile": ".78+.22*t*t",
+      "backgroundExcluded": true,
+      "referenceVideoUsedAsTexture": false
+    },
+    "candidateCameraFaceCountsBeforeBoundaryValidation": {
+      "A05.jpg": 3529,
+      "A04.jpg": 1634,
+      "A02.jpg": 7020,
+      "A01.jpg": 5651,
+      "B06.jpg": 314,
+      "B07.jpg": 163,
+      "B08.jpg": 162,
+      "A09.jpg": 2533,
+      "A07.jpg": 1316,
+      "A08.jpg": 1677,
+      "C08.jpg": 101,
+      "C07.jpg": 25,
+      "C06.jpg": 172,
+      "D08.jpg": 202,
+      "B04.jpg": 176,
+      "D07.jpg": 20,
+      "B05.jpg": 418,
+      "C05.jpg": 185,
+      "A06.jpg": 366,
+      "B09.jpg": 116,
+      "E08.jpg": 5000,
+      "D03.jpg": 111,
+      "B03.jpg": 223,
+      "E07.jpg": 291,
+      "D06.jpg": 256,
+      "D05.jpg": 252,
+      "B01.jpg": 307,
+      "B02.jpg": 158,
+      "E05.jpg": 5516,
+      "C09.jpg": 11,
+      "E06.jpg": 3087,
+      "C01.jpg": 196,
+      "D09.jpg": 16,
+      "E09.jpg": 207,
+      "D01.jpg": 370,
+      "C02.jpg": 12,
+      "E01.jpg": 8987,
+      "D02.jpg": 13,
+      "E02.jpg": 190,
+      "C03.jpg": 80,
+      "C04.jpg": 20,
+      "D04.jpg": 16,
+      "E03.jpg": 5160,
+      "E04.jpg": 177
+    },
+    "localBoundaryCorrection": {
+      "reason": "Rounded lower side triangles were previously misclassified as underside, causing dark green facets under native overhead lighting.",
+      "strictTrueClosureSelection": true,
+      "restoredSideFaces": 1331,
+      "geometryChanged": false,
+      "bodyPhotoUVChanged": false,
+      "photoBytesChanged": false,
+      "shadowOrLightingWorkaround": false,
+      "verifiedWith": "Same createViewer overhead lighting and low-side camera, old/new A/B screenshots"
+    }
+  },
+  "textureAtlas": {
+    "dimensions": [
+      4096,
+      4096
+    ],
+    "format": "JPEG",
+    "quality": 92,
+    "underfaceAdditionalImage": {
+      "dimensions": [
+        1535,
+        1183
+      ],
+      "source": "F01.jpg",
+      "unchangedOriginalJPEG": true
+    },
+    "baking": "45 original photos projected by recovered cameras; foreground-boundary UV sampling limited to ceramic pixels"
+  },
+  "reproductionInputs": [
+    {
+      "file": "actual-poisson-trimmed.ply",
+      "sha256": "277bba82319f638a379306ceedf6c47fde19618fc12df94637b39f61b5d2e62e"
+    },
+    {
+      "file": "recovered-cameras.json",
+      "sha256": "100955ff7074ef730b37d39d4ede43121f1313cfce70a244834ddf35e2baf2eb"
+    },
+    {
+      "file": "pointcloud-pca.json",
+      "sha256": "0ab9fcdf4b782d807c2b462a78c543960a2d7a72e02409f445ac137d58ce883b"
+    },
+    {
+      "file": "trim-metadata.json",
+      "sha256": "7c42fccf132acd5f28f115b9f7e01132c39c35197bf1a627a93a9568de9553c8"
+    }
+  ],
+  "output": {
+    "file": "celadon-pillow-reconstruction.glb",
+    "bytes": 7594328,
+    "sha256": "e90be13ff411c8ad4e30c9636351abf33f06c2f9c1ceb7b30efb1fef5f00d1f4",
+    "meshes": 1,
+    "primitives": 2,
+    "triangles": 74333,
+    "materials": 2,
+    "embeddedImages": [
+      {
+        "dimensions": [
+          4096,
+          4096
+        ],
+        "mimeType": "image/jpeg",
+        "sha256": "3da1ef46ab782274207f0a029d1d96dbc3f21b0ae767d8ff1bf942e17870e656",
+        "bytes": 1758227
+      },
+      {
+        "dimensions": [
+          1535,
+          1183
+        ],
+        "mimeType": "image/jpeg",
+        "sha256": "da93fee91d2c5964130d7306a2daa2860ae51408c4f000af63d1c9fcbf40cca6",
+        "bytes": 150115
+      }
+    ],
+    "externalResources": false
+  },
+  "reproduction": {
+    "scripts": [
+      "build_pillow_reconstruction.py",
+      "finish_pillow_reconstruction.py"
+    ],
+    "inputArchive": "pillow-reconstruction-inputs.zip",
+    "inputArchiveSha256": "155e4a00d5fc591e8d6aa07452d9122505da9cff500e46c4d05fccfcff7a1912",
+    "requires": "Blender4.3+ with bundled NumPy; original54 photographs retained in public/models/celadon-pillow",
+    "units": "Arbitrary normalized viewer units; no known physical scale"
+  },
+  "artifactId": "pillow",
+  "referenceUrl": "https://www.museum.go.kr/MUSEUM/contents/M0502000000.do?relicId=970&schM=view&searchId=search"
+}

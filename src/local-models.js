@@ -91,7 +91,7 @@ function restoreDefinition(id){
 
 function apply(id,url,metadata){
  const previous=active.get(id),artifact=restoreDefinition(id);
- for(const key of ['photoView','photoPoster','mapPreview','externalView','nativePending','modelPending'])delete artifact[key];
+ for(const key of ['photoView','photoPoster','mapPreview','preferMapPreview','hybridView','reconstructionModel','photoSourceDescription','photoCaptureDescription','externalView','nativePending','modelPending'])delete artifact[key];
  Object.assign(artifact,{model:url,referenceTint:false,sourceDescription:`이 기기에 등록한 3D 모델 · ${metadata.fileName}`,captureDescription:`이 기기에 등록한 3D 모델 · ${metadata.fileName}`});
  active.set(id,{...metadata,model:url});
  if(previous?.model!==url)disposeURL(previous?.model);

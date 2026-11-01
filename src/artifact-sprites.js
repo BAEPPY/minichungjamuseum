@@ -21,12 +21,12 @@ function footCenter(object,bounds){
  object.traverse(child=>{const positions=child.isMesh&&child.geometry?.getAttribute('position');if(!positions)return;for(let i=0;i<positions.count;i++){vertex.fromBufferAttribute(positions,i).applyMatrix4(child.matrixWorld);if(vertex.y<=threshold)foot.expandByPoint(vertex);}});
  const center=(foot.isEmpty()?bounds:foot).getCenter(new THREE.Vector3());center.y=bounds.min.y;return center;
 }
-export function artifactSpriteKey(artifact){return `${artifact.id}:${artifact.model||artifact.mapPreview||artifact.photoPoster||(artifact.nativePending?'pending':'example')}`;}
+export function artifactSpriteKey(artifact){return `${artifact.id}:${artifact.preferMapPreview&&artifact.mapPreview||artifact.model||artifact.mapPreview||artifact.photoPoster||(artifact.nativePending?'pending':'example')}`;}
 export function clearArtifactSprite(id){for(const key of thumbnails.keys())if(key.startsWith(id+':'))thumbnails.delete(key);}
 export function artifactSprite(original){
  const artifact={...original},key=artifactSpriteKey(artifact);
  if(thumbnails.has(key))return thumbnails.get(key);
- const result=!artifact.model&&artifact.mapPreview?loadImage(artifact.mapPreview):!artifact.model&&artifact.photoPoster?loadImage(artifact.photoPoster):artifact.nativePending?modelMarker():new Promise((resolve,reject)=>{
+ const result=artifact.mapPreview&&(artifact.preferMapPreview||!artifact.model)?loadImage(artifact.mapPreview):!artifact.model&&artifact.photoPoster?loadImage(artifact.photoPoster):artifact.nativePending?modelMarker():new Promise((resolve,reject)=>{
   queue=queue.catch(()=>{}).then(async()=>{
    let renderer,object;
    try{
