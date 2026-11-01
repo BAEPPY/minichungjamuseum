@@ -24,6 +24,8 @@ https://www.museum.go.kr/MUSEUM/contents/M0201020000.do?relicId=1227&schM=search
 
 `japan-peony/`는 국립중앙박물관 신안11590의 공식 View360 뷰어에서 받은 원본 JPEG 54장입니다. 6행 × 9열의 `0_0.jpg`~`5_8.jpg`를 재인코딩하지 않았습니다. 3D 메시가 아닌 다각도 사진으로 관찰·확대·촬영합니다. `manifest.json`은 자체 사진 뷰어의 시점 목록, `source-provenance.json`은 원본 URL·바이트 수·SHA-256과 출처 기록입니다.
 
+`japan-peony-reconstruction.glb`는 이 사진을 참고한 별도의 3D 재현 모델입니다. 기본 화면에서 연속 회전할 수 있으며, 원본 사진 모드로 전환해 확인할 수 있습니다. 형상과 무늬 배치에는 추정이 포함됩니다. 변환·추정 범위는 `japan-peony-reconstruction-source.json`에 기록합니다. 이 모델을 원본 실측 스캔으로 표시하지 않습니다.
+
 원본: https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/viewer.html
 
 국립중앙박물관 원본 자료의 이용 조건을 따르며 이 저장소가 새로운 이용허락을 부여하지 않습니다.

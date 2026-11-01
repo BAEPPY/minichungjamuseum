@@ -1,0 +1,180 @@
+{
+  "title": "청자 음인각 모란무늬 매병 — 원본 사진 기반 3D 재현",
+  "collection": "국립중앙박물관 · 신안11590",
+  "sourceViewerUrl": "https://www.museum.go.kr/relic3D/3D_V2/PS01001001007/011590/viewer.html",
+  "sourcePhotoManifest": "/models/japan-peony/source-provenance.json",
+  "type": "photo-based-approximate-reconstruction",
+  "notMeasuredScan": true,
+  "displayNoticeKo": "원본 사진 기반 3D 재현 · 형상·안쪽 일부 추정",
+  "purpose": "Continuous free rotation between the discrete original photograph viewpoints, using a local embedded GLB. The original 54 photographs remain available for evidence and comparison.",
+  "cameraRecovery": {
+    "model": "SIMPLE_PINHOLE, shared intrinsic parameters",
+    "focalLengthPixels": 7922.01054403214,
+    "principalPointPixels": [
+      657,
+      960
+    ],
+    "sourcePhotoCount": 54,
+    "registeredCount": 45,
+    "registeredOriginals": [
+      "0_0.jpg",
+      "0_1.jpg",
+      "0_2.jpg",
+      "0_3.jpg",
+      "0_4.jpg",
+      "0_5.jpg",
+      "0_6.jpg",
+      "0_7.jpg",
+      "0_8.jpg",
+      "1_0.jpg",
+      "1_1.jpg",
+      "1_2.jpg",
+      "1_3.jpg",
+      "1_4.jpg",
+      "1_5.jpg",
+      "1_6.jpg",
+      "1_7.jpg",
+      "1_8.jpg",
+      "2_0.jpg",
+      "2_1.jpg",
+      "2_2.jpg",
+      "2_3.jpg",
+      "2_4.jpg",
+      "2_5.jpg",
+      "2_6.jpg",
+      "2_7.jpg",
+      "2_8.jpg",
+      "3_0.jpg",
+      "3_1.jpg",
+      "3_2.jpg",
+      "3_3.jpg",
+      "3_4.jpg",
+      "3_5.jpg",
+      "3_6.jpg",
+      "3_7.jpg",
+      "3_8.jpg",
+      "4_0.jpg",
+      "4_1.jpg",
+      "4_2.jpg",
+      "4_3.jpg",
+      "4_4.jpg",
+      "4_5.jpg",
+      "4_6.jpg",
+      "4_7.jpg",
+      "4_8.jpg"
+    ],
+    "sparsePoints": 20112,
+    "filteredProfilePoints": 18965,
+    "meanReprojectionErrorPixels": 0.4417926900983678,
+    "meanTrackLength": 4.543506364359586,
+    "unregisteredOriginals": [
+      "5_0.jpg",
+      "5_1.jpg",
+      "5_2.jpg",
+      "5_3.jpg",
+      "5_4.jpg",
+      "5_5.jpg",
+      "5_6.jpg",
+      "5_7.jpg",
+      "5_8.jpg"
+    ],
+    "scale": "arbitrary; no physical dimensions are inferred"
+  },
+  "construction": {
+    "geometry": "A smooth radial profile and low-order azimuthal asymmetry fitted to 18,965 filtered feature points recovered from 45 calibrated photographs. 192 angular segments provide continuous geometry. A real open mouth and estimated closed bottom/interior are modeled.",
+    "outerLip": "Uneven outer-lip heights are derived from photographed feature points; wall thickness and between-feature shape are approximate.",
+    "underside": "The 9 inverted underside photographs did not register. Original 5_4.jpg is separately aligned to an approximate shallow circular foot. This alignment is manual, not recovered photogrammetry.",
+    "undersideProjection": {
+      "originalPhoto": "5_4.jpg",
+      "cameraRegistered": false,
+      "centerPixels": [
+        699.0,
+        979.0
+      ],
+      "radiiPixels": [
+        276.0,
+        292.0
+      ]
+    },
+    "interior": "Unseen interior is an estimated neutral dark ceramic cavity, without invented painted or incised decoration.",
+    "scale": "Normalized arbitrary units; this model is not suitable for physical measurements."
+  },
+  "appearance": {
+    "textureSizePixels": [
+      4096,
+      3072
+    ],
+    "encoding": "JPEG quality 93, 4:4:4 chroma; embedded in GLB",
+    "bodyTexture": "Calibrated projection from all 45 registered original photographs, weighted by front-facing surface angle. Foreground masks reject white source backgrounds.",
+    "lighting": "KHR_materials_unlit retains photographic colors and baked highlights without adding duplicate scene lighting. This is not a physically measured glaze material.",
+    "undersideTexture": "Separately projected original 5_4.jpg; manually annotated foot-disc ellipse excludes the sloped body.",
+    "generatedDecoration": false,
+    "runtimeColorHandling": "The exhibit sets preservePhotoColors; cloned unlit photographic materials bypass ACES tone mapping (toneMapped=false) while retaining sRGB texture decoding/output. Lit exhibits keep their existing scene tone mapping."
+  },
+  "asset": {
+    "path": "/models/japan-peony-reconstruction.glb",
+    "bytes": 7356700,
+    "sha256": "4d8d63367411f6a1cca4cf51c58140d98f11244943f8e5f5e670b29b2bb3010f",
+    "format": "glTF 2 binary",
+    "requiredDecoder": "none",
+    "selfContained": true,
+    "vertices": 65813,
+    "triangles": 129792,
+    "yUp": true,
+    "normalizedHeight": 1.0090858813971653,
+    "extensionsUsed": [
+      "KHR_materials_unlit"
+    ]
+  },
+  "validation": {
+    "originalJpegHashesUnchanged": 54,
+    "meshAudit": {
+      "finite": true,
+      "vertices": 65813,
+      "triangles": 129792,
+      "weldedVertices": 64898,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "minimumTriangleArea": 1.9700252919282506e-07,
+      "normalLengthRange": [
+        0.9999999999999998,
+        1.0000000000000002
+      ],
+      "signedVolume": 0.03819225480761005,
+      "uvRange": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ]
+    },
+    "topologyNote": "Boundary and manifold checks weld coincident UV-seam and axis-cap vertices. The vessel wall is a closed solid surface while the mouth remains visibly open into its modeled interior.",
+    "visualReview": "Front, quarter, opposite, top, and underside renders compared with original photographs. Smooth shoulder/foot transitions and underside-disc projection reviewed.",
+    "rebuildFromArchivedInputs": {
+      "passed": true,
+      "byteIdentical": true,
+      "sha256": "4d8d63367411f6a1cca4cf51c58140d98f11244943f8e5f5e670b29b2bb3010f",
+      "description": "Complete 4K rebuild from extracted repository input archive and unchanged source JPEGs reproduced the approved GLB byte for byte; no scratch-only inputs required."
+    }
+  },
+  "reproduction": {
+    "script": "scripts/build_peony_reconstruction.py",
+    "instructions": "scripts/PEONY_RECONSTRUCTION.md",
+    "inputs": "scripts/data/peony-reconstruction-inputs.zip",
+    "inputArchiveBytes": 308091,
+    "inputArchiveSha256": "764fdfa97c534cbd4b17e72b74b7e4ee515ab150bd3a80e8c8ae9fb9118ae6a4",
+    "inputContents": "Recovered cameras, fitted radial/asymmetry profile, 46 foreground masks, recovery summary, and input hashes. Uses the 54 unchanged source photographs already stored in this repository."
+  },
+  "limitations": [
+    "This is an approximate photo-derived reconstruction, not the museum's measured scan or original 3D mesh.",
+    "Small silhouette, chip depth, incised-line depth, and motif-position differences may remain. Incised decoration is primarily photographic texture, not measured relief.",
+    "Inside shape, wall thickness, underside-foot geometry, and alignment of the unregistered underside photograph are partly estimated.",
+    "Source illumination and highlights are baked into the texture; projected photographic regions can retain local blending or seam artifacts.",
+    "Use the original 54 photographs for close observation and evidence. This model has no reliable physical scale."
+  ],
+  "rights": "Follow the original National Museum of Korea usage terms; no new license granted."
+}

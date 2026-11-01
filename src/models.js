@@ -24,6 +24,9 @@ export async function loadArtifactModel(artifact,height=1.7){
   if(materials.has(original))return materials.get(original);
   const result=original.clone();
   for(const [key,value]of Object.entries(result))if(value?.isTexture){if(!textures.has(value))textures.set(value,value.clone());result[key]=textures.get(value);}
+  // This unlit atlas already contains the original photograph's display colors.
+  // Keep scene tone mapping for lit exhibits without remapping these pixels.
+  if(artifact.preservePhotoColors&&result.isMeshBasicMaterial&&result.map)result.toneMapped=false;
   if(artifact.referenceTint&&result.color)result.color.set(0x79a78e);
   materials.set(original,result);return result;
  };
