@@ -1,11 +1,11 @@
 import {test,expect} from '@playwright/test';
-import {seedCompletedComparison} from './helpers/course.js';
+import {seedCompletedComparison,openReportAtDesk,moveToCourseDestination} from './helpers/course.js';
 
 test('the supplied textured ewer is native, rotates and zooms, and keeps its photos and notes',async({page})=>{
  test.setTimeout(150000);
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.setViewportSize({width:1440,height:960});
- await seedCompletedComparison(page,{position:{x:6,z:-6.2,inside:true},avatarName:'주전자 탐험가',galleryReady:true});
+ await seedCompletedComparison(page,{destination:'ewer',avatarName:'주전자 탐험가',galleryReady:true});
  await page.goto('/');
  await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});
  await expect(page.locator('#nearName')).toHaveText('청자 어룡형 주전자');
@@ -72,13 +72,13 @@ test('the supplied textured ewer is native, rotates and zooms, and keeps its pho
  await page.locator('#observationNote').fill(note);
  await expect(page.locator('#noteStatus')).toContainText('저장했어요');
  await page.screenshot({path:'/workspace/game-ewer.png'});
- await page.locator('#chooseForReport').click();
- await expect(page.locator('#reportDialog')).toBeVisible();
+ await openReportAtDesk(page);
  await expect(page.locator('#reportForm [name="artifactId"]')).toHaveValue('ewer');
  await expect(page.locator('#reportForm [data-gallery-note="ewer"]')).toHaveValue(note);
  await expect(page.locator('#reportPhotos img')).toHaveCount(2);
  expect(await page.locator('#reportPhotos img').nth(1).getAttribute('src')).toBe(secondPhoto);
  await page.locator('#reportDialog [data-close]').click();
+ await moveToCourseDestination(page,'ewer');
 
  await page.reload();
  await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});

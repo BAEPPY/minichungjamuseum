@@ -128,7 +128,7 @@ export function requestProfile({initial={},allowCancel=false}={}) {
     };
     const updatePreview = () => {
       const preview = find('#profileAvatarPreview');
-      const path = `/art/sprites/avatar-${selectedHair}.png`;
+      const path = `/art/map/avatar-${selectedHair}.webp`;
       if(preview.dataset.sprite===path&&preview.dataset.color===selectedColor) return;
       preview.dataset.sprite = path;
       preview.dataset.color = selectedColor;

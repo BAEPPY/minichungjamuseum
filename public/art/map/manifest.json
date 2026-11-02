@@ -1,0 +1,300 @@
+{
+  "purpose": "Map delivery optimization only; no resize, redraw, recoloring or sprite-marker changes.",
+  "originalsUnmodified": true,
+  "script": "scripts/build_map_art.py",
+  "encoder": {
+    "pillow": "12.3.0",
+    "libwebp": "1.6.0"
+  },
+  "sourceBytes": 17690782,
+  "outputBytes": 3867280,
+  "transferReductionPercent": 78.14,
+  "files": [
+    {
+      "key": "building",
+      "source": "/art/museum-building.png",
+      "output": "/art/map/museum-building.webp",
+      "width": 1536,
+      "height": 1024,
+      "sourceBytes": 2271701,
+      "outputBytes": 371374,
+      "sourceSha256": "f6fdc80200b3b185fc6150145671765b54c5fc2606883532d13f788dd8eebcba",
+      "outputSha256": "6c322778f178b35f2d2ec9c134a828c6c9033b76197bcf8514a0a68ca12f3aa2",
+      "encoding": "quality 94 RGB, lossless alpha",
+      "alphaBoundsThreshold18": {
+        "x": 55,
+        "y": 33,
+        "w": 1428,
+        "h": 914
+      },
+      "alphaByteIdentical": true,
+      "rgbaByteIdentical": false,
+      "visibleMeanAbsoluteRgbError": 1.675449,
+      "visibleRgbPsnrDb": 41.032119
+    },
+    {
+      "key": "gate",
+      "source": "/art/museum-gate.png",
+      "output": "/art/map/museum-gate.webp",
+      "width": 1536,
+      "height": 1024,
+      "sourceBytes": 2029242,
+      "outputBytes": 292218,
+      "sourceSha256": "9fd6da04dda47df85db17601a123472a73e7ae498054abea87361a70f9df3d59",
+      "outputSha256": "138ec0f5e911749a3fb15a60e5118dcc0bffafe90285ef6d9824f7cb20ed8f5d",
+      "encoding": "quality 94 RGB, lossless alpha",
+      "alphaBoundsThreshold18": {
+        "x": 183,
+        "y": 21,
+        "w": 1179,
+        "h": 985
+      },
+      "alphaByteIdentical": true,
+      "rgbaByteIdentical": false,
+      "visibleMeanAbsoluteRgbError": 1.738006,
+      "visibleRgbPsnrDb": 40.759652
+    },
+    {
+      "key": "stone",
+      "source": "/art/stone-tile.png",
+      "output": "/art/map/stone-tile.webp",
+      "width": 1774,
+      "height": 887,
+      "sourceBytes": 1013844,
+      "outputBytes": 187744,
+      "sourceSha256": "63ae70f2f78e1d4035e704b5aa1e0c6e7c741121c51b836cb5ec381480ea7a0c",
+      "outputSha256": "8483ce9ac5f49ffcf88c1883ee5f1e607ae7ed44ac45126fd29b85f1534885b4",
+      "encoding": "quality 94 RGB, lossless alpha",
+      "alphaBoundsThreshold18": {
+        "x": 48,
+        "y": 33,
+        "w": 1678,
+        "h": 844
+      },
+      "alphaByteIdentical": true,
+      "rgbaByteIdentical": false,
+      "visibleMeanAbsoluteRgbError": 1.354994,
+      "visibleRgbPsnrDb": 35.967343
+    },
+    {
+      "key": "wood",
+      "source": "/art/wood-tile.png",
+      "output": "/art/map/wood-tile.webp",
+      "width": 1774,
+      "height": 887,
+      "sourceBytes": 1283947,
+      "outputBytes": 249188,
+      "sourceSha256": "a7b1a735e8413e08283396acca4ca551e266ba508be23cc85b66abcc16115136",
+      "outputSha256": "347f67d157be362a3ffae60b34f3819f2e5970fc11e4ef2795d6886ab1d431c0",
+      "encoding": "quality 94 RGB, lossless alpha",
+      "alphaBoundsThreshold18": {
+        "x": 41,
+        "y": 6,
+        "w": 1687,
+        "h": 881
+      },
+      "alphaByteIdentical": true,
+      "rgbaByteIdentical": false,
+      "visibleMeanAbsoluteRgbError": 1.765442,
+      "visibleRgbPsnrDb": 33.189227
+    },
+    {
+      "key": "wall",
+      "source": "/art/gallery-wall.png",
+      "output": "/art/map/gallery-wall.webp",
+      "width": 1536,
+      "height": 1024,
+      "sourceBytes": 1506167,
+      "outputBytes": 166176,
+      "sourceSha256": "d39a0472353f92760163359a173aeac93e5fd51df9701e8248c828de0cbcce57",
+      "outputSha256": "b470db9f2e298eab0b478bc3018a5adb75bf723f7cdf69a6f12a39fd9d7b52b3",
+      "encoding": "quality 94 RGB, lossless alpha",
+      "alphaBoundsThreshold18": {
+        "x": 105,
+        "y": 122,
+        "w": 1326,
+        "h": 802
+      },
+      "alphaByteIdentical": true,
+      "rgbaByteIdentical": false,
+      "visibleMeanAbsoluteRgbError": 1.36785,
+      "visibleRgbPsnrDb": 41.632653
+    },
+    {
+      "key": "case",
+      "source": "/art/props/display-case.png",
+      "output": "/art/map/display-case.webp",
+      "width": 1536,
+      "height": 1024,
+      "sourceBytes": 2054081,
+      "outputBytes": 333064,
+      "sourceSha256": "af453256790173824f26d40d1b7f1220cc8aa018e271ee14740da48cedf38dbb",
+      "outputSha256": "d111ad5ad76efa478865f1f86a2b10cc348359d74a201d7c1e707972e473db73",
+      "encoding": "quality 94 RGB, lossless alpha",
+      "alphaBoundsThreshold18": {
+        "x": 167,
+        "y": 18,
+        "w": 1213,
+        "h": 1006
+      },
+      "alphaByteIdentical": true,
+      "rgbaByteIdentical": false,
+      "visibleMeanAbsoluteRgbError": 1.616644,
+      "visibleRgbPsnrDb": 39.712747
+    },
+    {
+      "key": "tree",
+      "source": "/art/props/tree.png",
+      "output": "/art/map/tree.webp",
+      "width": 1266,
+      "height": 1243,
+      "sourceBytes": 1431169,
+      "outputBytes": 389538,
+      "sourceSha256": "53926856b2ab89d80e1ae2df735c74d4bc11031f07737ff79a56bc6e5fbaca7e",
+      "outputSha256": "a6fd0ecc9f4b554a365ac9cbad417daf0fe0b6edb0ee3a75c035acd07b0d7879",
+      "encoding": "quality 94 RGB, lossless alpha",
+      "alphaBoundsThreshold18": {
+        "x": 71,
+        "y": 19,
+        "w": 1153,
+        "h": 1202
+      },
+      "alphaByteIdentical": true,
+      "rgbaByteIdentical": false,
+      "visibleMeanAbsoluteRgbError": 2.286098,
+      "visibleRgbPsnrDb": 33.295118
+    },
+    {
+      "key": "flowers",
+      "source": "/art/props/flower-planter.png",
+      "output": "/art/map/flower-planter.webp",
+      "width": 1536,
+      "height": 1024,
+      "sourceBytes": 1504083,
+      "outputBytes": 195566,
+      "sourceSha256": "2db333fb27aab9d7e594e1beab6f6533e453a973d3ad3a2bd59c34091b608d7b",
+      "outputSha256": "ba67865d16ef1c6baf058c7709521f527b9679e42c7512a98034b2a96609a132",
+      "encoding": "quality 94 RGB, lossless alpha",
+      "alphaBoundsThreshold18": {
+        "x": 155,
+        "y": 141,
+        "w": 1231,
+        "h": 811
+      },
+      "alphaByteIdentical": true,
+      "rgbaByteIdentical": false,
+      "visibleMeanAbsoluteRgbError": 2.01658,
+      "visibleRgbPsnrDb": 37.201838
+    },
+    {
+      "key": "bench",
+      "source": "/art/props/bench.png",
+      "output": "/art/map/bench.webp",
+      "width": 1774,
+      "height": 887,
+      "sourceBytes": 572497,
+      "outputBytes": 140608,
+      "sourceSha256": "36f0300ee4970ceba5eac769f0530d01d6a7666eec0a5663aaeea989333ade33",
+      "outputSha256": "7b934babb537e1fe9d68717baebe798908306208a40a173972fa93333a8822bd",
+      "encoding": "quality 94 RGB, lossless alpha",
+      "alphaBoundsThreshold18": {
+        "x": 330,
+        "y": 86,
+        "w": 1115,
+        "h": 745
+      },
+      "alphaByteIdentical": true,
+      "rgbaByteIdentical": false,
+      "visibleMeanAbsoluteRgbError": 2.619518,
+      "visibleRgbPsnrDb": 31.76766
+    },
+    {
+      "key": "desk",
+      "source": "/art/props/writing-desk.png",
+      "output": "/art/map/writing-desk.webp",
+      "width": 1536,
+      "height": 1024,
+      "sourceBytes": 1636376,
+      "outputBytes": 189610,
+      "sourceSha256": "ade4d15f5fef63ba8c859a71e01585b17510418748e2beed402fdeeef294f88d",
+      "outputSha256": "eb4aeadf759ae1604d7e554a34c84376921b25bdee2f78bd34b5172a86b84cc9",
+      "encoding": "quality 94 RGB, lossless alpha",
+      "alphaBoundsThreshold18": {
+        "x": 228,
+        "y": 60,
+        "w": 1067,
+        "h": 923
+      },
+      "alphaByteIdentical": true,
+      "rgbaByteIdentical": false,
+      "visibleMeanAbsoluteRgbError": 2.048904,
+      "visibleRgbPsnrDb": 37.298664
+    },
+    {
+      "key": "frame",
+      "source": "/art/props/report-frame.png",
+      "output": "/art/map/report-frame.webp",
+      "width": 1274,
+      "height": 1235,
+      "sourceBytes": 690837,
+      "outputBytes": 104822,
+      "sourceSha256": "984ba07400427f0e620f0cfcc537785b4904e629f95e5de2a785a474fed36d50",
+      "outputSha256": "6540250c5998236d42195f3f9e1b8bf3bbe82f35e8dbfff3149e8bd17c034ce2",
+      "encoding": "quality 94 RGB, lossless alpha",
+      "alphaBoundsThreshold18": {
+        "x": 376,
+        "y": 34,
+        "w": 534,
+        "h": 1158
+      },
+      "alphaByteIdentical": true,
+      "rgbaByteIdentical": false,
+      "visibleMeanAbsoluteRgbError": 1.722486,
+      "visibleRgbPsnrDb": 32.981636
+    },
+    {
+      "key": "short",
+      "source": "/art/sprites/avatar-short.png",
+      "output": "/art/map/avatar-short.webp",
+      "width": 1448,
+      "height": 1086,
+      "sourceBytes": 873835,
+      "outputBytes": 646258,
+      "sourceSha256": "c07cf5c83fc78fc37e94d7e2a5d52082aaaa9c46455f1347224f3c9cb9b7994a",
+      "outputSha256": "170c88836a7a0df04a6d497959fca595045a2a4acd701b2eb2adfe7f4234d0d8",
+      "encoding": "lossless RGBA",
+      "alphaBoundsThreshold18": {
+        "x": 168,
+        "y": 27,
+        "w": 1109,
+        "h": 1026
+      },
+      "alphaByteIdentical": true,
+      "rgbaByteIdentical": true,
+      "visibleMeanAbsoluteRgbError": 0.0,
+      "visibleRgbPsnrDb": null
+    },
+    {
+      "key": "bob",
+      "source": "/art/sprites/avatar-bob.png",
+      "output": "/art/map/avatar-bob.webp",
+      "width": 1448,
+      "height": 1086,
+      "sourceBytes": 823003,
+      "outputBytes": 601114,
+      "sourceSha256": "49e0a09f2af7aec910e8c1cf354aadebd6e9afe42dd16a566029f56fc91adf9f",
+      "outputSha256": "baffc2a43775d16dd76004b2bc9cf0cd02ebcb943472c13ba72f4f1d72c4ee5b",
+      "encoding": "lossless RGBA",
+      "alphaBoundsThreshold18": {
+        "x": 172,
+        "y": 65,
+        "w": 1099,
+        "h": 963
+      },
+      "alphaByteIdentical": true,
+      "rgbaByteIdentical": true,
+      "visibleMeanAbsoluteRgbError": 0.0,
+      "visibleRgbPsnrDb": null
+    }
+  ]
+}

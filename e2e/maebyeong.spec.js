@@ -1,10 +1,10 @@
 import {test,expect} from '@playwright/test';
-import {seedCompletedComparison} from './helpers/course.js';
+import {seedCompletedComparison,openReportAtDesk,moveToCourseDestination} from './helpers/course.js';
 
 test.setTimeout(120000);
 
 test.beforeEach(async({page})=>{
- await seedCompletedComparison(page,{position:{x:8,z:-1.7,inside:true},avatarName:'매병 탐험가',galleryReady:true});
+ await seedCompletedComparison(page,{destination:'maebyeong',avatarName:'매병 탐험가',galleryReady:true});
 });
 
 async function loadMaebyeongRoom(page){
@@ -100,13 +100,13 @@ test('textured maebyeong can be observed, photographed, inserted into a report a
  expect(photo.startsWith('data:image/jpeg;base64,')).toBeTruthy();
  expect(photo.length).toBeLessThan(220000);
  await page.screenshot({path:'/workspace/game-maebyeong-v2.png'});
- await page.locator('#chooseForReport').click();
- await expect(page.locator('#reportDialog')).toBeVisible();
+ await openReportAtDesk(page);
  await expect(page.locator('#reportForm [name="artifactId"]')).toHaveValue('maebyeong');
  await expect(page.locator('#reportForm [data-gallery-note="maebyeong"]')).toHaveValue('매병의 둥근 어깨와 표면 무늬를 관찰했어요.');
  await expect(page.locator('#reportPhotos img')).toHaveCount(1);
  expect(await page.locator('#reportPhotos img').getAttribute('src')).toBe(photo);
  await page.locator('#reportDialog [data-close]').click();
+ await moveToCourseDestination(page,'maebyeong');
  await expect(page.locator('#nearName')).toHaveText('청자 상감 운학문 매병');
  await page.keyboard.press('f');
  await expect(page.locator('#observationDialog')).toBeVisible();

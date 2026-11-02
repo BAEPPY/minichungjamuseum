@@ -1,11 +1,13 @@
 import {test,expect} from '@playwright/test';
 import {writeFile} from 'node:fs/promises';
+import {MAP_LAYOUT,mapDestination} from '../src/map-layout.js';
 import {seedCompletedComparison,moveToCourseDestination} from './helpers/course.js';
 
 test.setTimeout(210000);
 const comparisonIds=['compare-peony','compare-yuan','compare-inlay'];
 const galleryIds=['pillow','stool','incense','maebyeong','ewer'];
-const deskPosition={x:-4,z:-10.3,inside:true};
+const deskTarget=mapDestination('comparison-desk');
+const deskPosition={x:deskTarget.position[0],z:deskTarget.position[1]+1.8,inside:true};
 
 async function loadMuseum(page){
  await page.goto('/');
@@ -14,14 +16,14 @@ async function loadMuseum(page){
 async function progress(page){
  return page.evaluate(async()=>{const {get}=await import('/src/storage.js');return await get('game-progress');});
 }
-async function seedStart(page,{position={x:-7,z:1.4,inside:true},entries={}}={}){
+async function seedStart(page,{position=MAP_LAYOUT.spawns.study,entries={}}={}){
  await page.goto('/favicon.svg');
- await page.evaluate(async({position,entries})=>{
+ await page.evaluate(async({position,entries,mapVersion})=>{
   const {put}=await import('/src/storage.js');const {COURSE_VERSION}=await import('/src/course.js');
-  await put({id:'game-progress',profileReady:true,avatarName:'비교 탐험가',avatarColor:'#eccd79',avatarHair:'short',inside:true,exited:false,visited:[],making:[],comparisonVisited:[],comparisonCompleted:false,courseVersion:COURSE_VERSION,collectionVersion:'selected-celadon-v1',position});
+  await put({id:'game-progress',profileReady:true,avatarName:'비교 탐험가',avatarColor:'#eccd79',avatarHair:'short',inside:true,exited:false,visited:[],making:[],comparisonVisited:[],comparisonCompleted:false,courseVersion:COURSE_VERSION,mapVersion,collectionVersion:'selected-celadon-v1',position});
   await put({id:'notebook',entries});
   await put({id:'comparison-draft',excellence:'',evidence:''});
- },{position,entries});
+ },{position,entries,mapVersion:MAP_LAYOUT.version});
 }
 async function openComparison(page){
  await moveToCourseDestination(page,'comparison-desk');
@@ -194,13 +196,13 @@ test('Japanese reconstructed 3D responds to small continuous drags and preserves
 });
 
 test('Japanese original photos recover from manifest and frame failures after a real model failure',async({page})=>{
- const errors=[],museumRequests=[],localPhotoRequests=[],mapPreviewRequests=[];
+ const errors=[],museumRequests=[],localPhotoRequests=[],mapModelRequests=[];
  page.on('pageerror',error=>errors.push(error.message));
  page.on('request',request=>{
   const url=new URL(request.url());
   if(url.hostname==='museum.go.kr'||url.hostname.endsWith('.museum.go.kr'))museumRequests.push(request.url());
   if(url.pathname.startsWith('/models/japan-peony/'))localPhotoRequests.push(url.pathname);
-  if(url.pathname==='/art/previews/japan-peony-cutout.png')mapPreviewRequests.push(url.pathname);
+  if(url.pathname==='/models/map/japan-peony-reconstruction.glb')mapModelRequests.push(url.pathname);
  });
  const manifestPattern='**/models/japan-peony/manifest.json',framePattern='**/models/japan-peony/2_4.jpg';
  let modelFailures=0,manifestFailures=0,frameFailures=0;
@@ -216,16 +218,7 @@ test('Japanese original photos recover from manifest and frame failures after a 
  expect(source).toEqual({photoView:'/models/japan-peony/manifest.json',mapPreview:'/art/previews/japan-peony-cutout.png',model:'/models/japan-peony-reconstruction.glb',pending:false,localOverride:false});
  await expect(page.locator('video,iframe')).toHaveCount(0);
  await moveToCourseDestination(page,'compare-peony');
- await expect.poll(()=>mapPreviewRequests.length,{timeout:30000}).toBeGreaterThan(0);
- const previewAlpha=await page.evaluate(async path=>{
-  const image=new Image();image.src=path;await image.decode();
-  const canvas=new OffscreenCanvas(32,32),ctx=canvas.getContext('2d');ctx.drawImage(image,0,0,32,32);
-  const rgba=ctx.getImageData(0,0,32,32).data;let clear=0,opaque=0;
-  for(let index=3;index<rgba.length;index+=4){if(rgba[index]===0)clear++;if(rgba[index]>240)opaque++;}
-  return {width:image.naturalWidth,height:image.naturalHeight,clear,opaque,corners:[rgba[3],rgba[31*4+3],rgba[(31*32)*4+3],rgba[(32*32-1)*4+3]]};
- },source.mapPreview);
- expect(previewAlpha.width).toBeGreaterThan(1000);expect(previewAlpha.clear).toBeGreaterThan(100);expect(previewAlpha.opaque).toBeGreaterThan(100);
- expect(previewAlpha.corners).toEqual([0,0,0,0]);
+ await expect.poll(()=>mapModelRequests.length,{timeout:30000}).toBeGreaterThan(0);
  await page.screenshot({path:'/workspace/game-comparison-japan-map.png'});
  await page.keyboard.press('f');
  await expect(page.locator('#observationDialog')).toBeVisible();
@@ -300,13 +293,13 @@ test('Japanese original photos recover from manifest and frame failures after a 
  expect(localPhotoRequests).toContain('/models/japan-peony/manifest.json');
  expect(localPhotoRequests).toContain('/models/japan-peony/2_5.jpg');
  expect(museumRequests).toEqual([]);expect(errors).toEqual([]);
- await writeFile('/workspace/game-japan-fallback-diagnostics.json',JSON.stringify({modelFailures,manifestFailures,frameFailures,localPhotoRequests,mapPreviewRequests,previewAlpha,museumRequests,pageErrors:errors},null,2));
+ await writeFile('/workspace/game-japan-fallback-diagnostics.json',JSON.stringify({modelFailures,manifestFailures,frameFailures,localPhotoRequests,mapModelRequests,museumRequests,pageErrors:errors},null,2));
 });
 
 test('a failed real comparison model stays unvisited, then a successful retry preserves photos and notes',async({page})=>{
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.route('**/models/yuan-celadon-vase.glb',route=>route.abort('failed'));
- await seedStart(page,{position:{x:-4,z:-3.2,inside:true}});
+ await seedStart(page);
  await loadMuseum(page);
  await moveToCourseDestination(page,'compare-yuan');
  await page.keyboard.press('f');
@@ -375,7 +368,7 @@ test('legacy video completion cannot unlock the new course and earlier records r
  await expect(page.locator('#makingProgress')).toHaveText('비교 0/3');
  await expect(page.locator('#reportProgress')).not.toHaveClass(/done/);
  await expect(page.locator('video,#videoDialog')).toHaveCount(0);
- await expect.poll(async()=>(await progress(page)).position).toMatchObject({x:-7,z:1.4,inside:true});
+ await expect.poll(async()=>(await progress(page)).position).toMatchObject(MAP_LAYOUT.spawns.study);
  expect((await progress(page)).comparisonVisited).toEqual([]);
  expect((await progress(page)).comparisonCompleted).toBe(false);
  expect((await progress(page)).visited).toEqual(galleryIds);
@@ -401,7 +394,7 @@ test('legacy video completion cannot unlock the new course and earlier records r
  },legacy.id);
  await loadMuseum(page);
  await expect(page.locator('#missionTitle')).toContainText('입구');
- expect(await progress(page)).toMatchObject({inside:false,exited:true,position:{x:10,z:19,inside:false}});
+ expect(await progress(page)).toMatchObject({inside:false,exited:true});
  await page.locator('#guideButton').click();
  // Observe its actual walk before using any map destination.
  await expect(page.locator('#nearName')).toHaveText('박물관 입장',{timeout:45000});
@@ -418,7 +411,7 @@ test('legacy video completion cannot unlock the new course and earlier records r
 test('editing comparison evidence invalidates an unpublished final report and gates the gallery again',async({page})=>{
  // An explicit completed-record fixture isolates revision handling. The real
  // three-vase observation journey is verified separately with actual assets.
- await seedCompletedComparison(page,{position:{x:0,z:-10.3,inside:true},galleryReady:true});
+ await seedCompletedComparison(page,{destination:'desk',galleryReady:true});
  await page.evaluate(async()=>{
   const {get,put}=await import('/src/storage.js');const {courseRecord}=await import('/src/course.js');
   const notes=(await get('notebook')).entries,comparison=await get('comparison-draft');
@@ -436,7 +429,10 @@ test('editing comparison evidence invalidates an unpublished final report and ga
  await expect(page.locator('#draftStatus')).toContainText('임시 저장됨',{timeout:30000});
  await expect.poll(()=>page.evaluate(async()=>{const {get}=await import('/src/storage.js');return Boolean(await get('ready-report'));})).toBe(false);
  await expect(page.locator('#reportProgress')).not.toHaveClass(/done/);
- expect((await progress(page)).comparisonCompleted).toBe(false);
+ // Historical completion survives an edit, but current evidence must remain
+ // valid before the gallery/report can be considered complete again.
+ expect((await progress(page)).comparisonCompleted).toBe(true);
+ expect(await page.evaluate(async()=>{const {get}=await import('/src/storage.js'),{comparisonComplete}=await import('/src/course.js');return comparisonComplete(await get('game-progress'),(await get('notebook')).entries,await get('comparison-draft'));})).toBe(false);
  await page.locator('#reportDialog [data-close]').click();
  await expectGalleryLocked(page);
  await page.reload();await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:60000});

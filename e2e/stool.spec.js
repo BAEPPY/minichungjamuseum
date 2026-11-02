@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {seedCompletedComparison} from './helpers/course.js';
+import {seedCompletedComparison,openReportAtDesk,moveToCourseDestination} from './helpers/course.js';
 import {mkdir,writeFile} from 'node:fs/promises';
 
 test('the built-in chair has real openwork and supports native observation, photos and reports',async({page})=>{
@@ -13,7 +13,7 @@ test('the built-in chair has real openwork and supports native observation, phot
   await test.info().attach(name,{path,contentType:'application/json'});
  };
  await page.setViewportSize({width:1440,height:960});
- await seedCompletedComparison(page,{position:{x:8,z:2.8,inside:true},avatarName:'투각 의자 탐험가',galleryReady:true});
+ await seedCompletedComparison(page,{destination:'stool',avatarName:'투각 의자 탐험가',galleryReady:true});
  await page.goto('/');
  await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});
  await expect(page.locator('#nearName')).toHaveText('청자 투각 의자');
@@ -133,13 +133,13 @@ test('the built-in chair has real openwork and supports native observation, phot
  await page.mouse.up();
  await page.locator('#zoomObjectIn').click();
  await page.screenshot({path:'/workspace/game-stool-top.png'});
- await page.locator('#chooseForReport').click();
- await expect(page.locator('#reportDialog')).toBeVisible();
+ await openReportAtDesk(page);
  await expect(page.locator('#reportForm [name="artifactId"]')).toHaveValue('stool');
  await expect(page.locator('#reportForm [data-gallery-note="stool"]')).toHaveValue(note);
  await expect(page.locator('#reportPhotos img')).toHaveCount(2);
  expect(await page.locator('#reportPhotos img').nth(1).getAttribute('src')).toBe(changedPhoto);
  await page.locator('#reportDialog [data-close]').click();
+ await moveToCourseDestination(page,'stool');
 
  await page.reload();
  await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});

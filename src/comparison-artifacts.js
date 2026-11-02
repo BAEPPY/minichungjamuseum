@@ -7,6 +7,6 @@ export const comparisonArtifacts=[
  {id:'compare-yuan',comparison:true,name:'원나라 시대 청자 병',shortName:'중국 · 원나라 청자 병',kind:'중국 · 용천요',era:'원나라, 1271–1368',shape:'vase',color:0x839b7e,model:'/models/yuan-celadon-vase.glb',referenceTint:false,referenceUrl:'https://sketchfab.com/3d-models/vase-yuan-dynasty-1271-1368-a50b38792b264f18af523dc935dae606',licenseUrl:'https://creativecommons.org/licenses/by-nc-sa/4.0/',licenseLabel:'CC BY-NC-SA 4.0',sourceDescription:'사진 질감 3D · Art Gallery of Hamilton · 1976.19.M / Serena Zena Mak Walk·Sari-Sari Xchange, 2023 / CC BY-NC-SA 4.0',captureDescription:'AGH · 원나라 청자 병 · CC BY-NC-SA 4.0',use:'액체 등을 담는 병이에요.',clue:'세로로 도드라진 몸통과 동물 모양 손잡이, 고리를 찾아보세요.',info:'작가 미상의 중국 원나라 시대 작품으로, 용천요의 청자 유약을 입힌 석기예요. 세로로 도드라진 몸통과 고리가 달린 상상 속 동물 모양 손잡이는 금속 그릇에서 영향을 받은 형태예요. Herman H. Levy가 1976년에 기증했어요.'},
  {...artifacts.find(a=>a.id==='maebyeong'),id:'compare-inlay',comparison:true,shortName:'고려 · 상감 운학문 매병',kind:'한국',clue:'학과 구름의 검고 흰 무늬, 작은 입과 넓은 어깨를 다른 두 작품과 비교해 보세요.'}
 ];
-export const comparisonPositions=[[-7,-.5],[-4,-5],[-8,-8.5]];
+export {comparisonPositions} from './map-layout.js';
 export const comparisonIds=comparisonArtifacts.map(a=>a.id);
 export const allObservationArtifacts=[...comparisonArtifacts,...artifacts];
