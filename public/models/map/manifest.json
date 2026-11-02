@@ -1,0 +1,145 @@
+{
+  "purpose": "Small derived meshes for in-map display only. Detailed observations use unchanged original models.",
+  "method": "Blender decimation with retained materials/vertex colors/UVs and textures resized to at most 512px, JPEG quality85. No new decoration or color tint.",
+  "models": [
+    {
+      "source": "/models/celadon-incense.glb",
+      "map": "/models/map/celadon-incense.glb",
+      "original": {
+        "bytes": 3311408,
+        "sha256": "9599918f6f13c66f8d9be5261c79250f1b339be221333f71e7e0f0f0e7ea98fc",
+        "triangles": 138028,
+        "extensions": []
+      },
+      "optimized": {
+        "bytes": 571644,
+        "sha256": "020742f7bc86a5cf6f6e5d5790a63f655a5f89007d8cced224fc21f0c97e1806",
+        "triangles": 23998,
+        "extensions": []
+      },
+      "maximumTextureDimension": 512
+    },
+    {
+      "source": "/models/celadon-ewer.glb",
+      "map": "/models/map/celadon-ewer.glb",
+      "original": {
+        "bytes": 10127892,
+        "sha256": "b1f0d72d42bec9f955a0f67a5370a839c3cf3c206900bebe3edcd258e60948de",
+        "triangles": 298240,
+        "extensions": []
+      },
+      "optimized": {
+        "bytes": 715768,
+        "sha256": "713f4453480758c425cf0eea18b1031934ea8a773f5d4d03d613818a1ba092bd",
+        "triangles": 25998,
+        "extensions": []
+      },
+      "maximumTextureDimension": 512
+    },
+    {
+      "source": "/models/celadon-maebyeong-v2.glb",
+      "map": "/models/map/celadon-maebyeong-v2.glb",
+      "original": {
+        "bytes": 20053528,
+        "sha256": "4768ba35afa68b811c1d4aad759948e60ab0e4d5ba26526a73db64210bb42965",
+        "triangles": 131072,
+        "extensions": [
+          "KHR_materials_clearcoat",
+          "KHR_materials_specular",
+          "KHR_materials_ior"
+        ]
+      },
+      "optimized": {
+        "bytes": 410684,
+        "sha256": "074fabc021d3f3ffbf395310ea18e3415e563ad768532f03247b8ad9d943b7f4",
+        "triangles": 13999,
+        "extensions": [
+          "KHR_materials_clearcoat",
+          "KHR_materials_specular",
+          "KHR_materials_ior"
+        ]
+      },
+      "maximumTextureDimension": 512
+    },
+    {
+      "source": "/models/japan-peony-reconstruction.glb",
+      "map": "/models/map/japan-peony-reconstruction.glb",
+      "original": {
+        "bytes": 7356700,
+        "sha256": "4d8d63367411f6a1cca4cf51c58140d98f11244943f8e5f5e670b29b2bb3010f",
+        "triangles": 129792,
+        "extensions": [
+          "KHR_materials_unlit"
+        ]
+      },
+      "optimized": {
+        "bytes": 365424,
+        "sha256": "48b3f3c13412a4ea901da4b5bf1449e0a9ec6f014fb5e83a189e07a19ad3939f",
+        "triangles": 13999,
+        "extensions": [
+          "KHR_materials_unlit"
+        ]
+      },
+      "maximumTextureDimension": 512
+    },
+    {
+      "source": "/models/celadon-stool-wrl.glb",
+      "map": "/models/map/celadon-stool-wrl.glb",
+      "original": {
+        "bytes": 21757120,
+        "sha256": "ead0200e0eb2d75e01ef5452ef68d8998dbdab33fefa8ba9652c1277dc7f5d2c",
+        "triangles": 777108,
+        "extensions": [
+          "KHR_materials_clearcoat"
+        ]
+      },
+      "optimized": {
+        "bytes": 765144,
+        "sha256": "240d3fefaf3e789e66644d44d477437183aa52f2f892c7e762553940155b69a0",
+        "triangles": 31998,
+        "extensions": [
+          "KHR_materials_clearcoat"
+        ]
+      },
+      "maximumTextureDimension": 512
+    },
+    {
+      "source": "/models/yuan-celadon-vase.glb",
+      "map": "/models/map/yuan-celadon-vase.glb",
+      "original": {
+        "bytes": 7026032,
+        "sha256": "2eba8fec554a358f7d63e6cbc51fe7681bd14e9043e2787e38da77427788ba92",
+        "triangles": 82779,
+        "extensions": [
+          "KHR_materials_unlit"
+        ]
+      },
+      "optimized": {
+        "bytes": 906684,
+        "sha256": "6faba64f6776d67b71470dbd984074759eac35150544ee5c2c1cd2d8847788d9",
+        "triangles": 16000,
+        "extensions": [
+          "KHR_materials_unlit"
+        ]
+      },
+      "maximumTextureDimension": 512
+    },
+    {
+      "source": "/models/celadon-pillow-reconstruction.glb",
+      "map": "/models/map/celadon-pillow-reconstruction.glb",
+      "original": {
+        "bytes": 7594328,
+        "sha256": "e90be13ff411c8ad4e30c9636351abf33f06c2f9c1ceb7b30efb1fef5f00d1f4",
+        "triangles": 74333,
+        "extensions": []
+      },
+      "optimized": {
+        "bytes": 2481304,
+        "sha256": "e1df500c2a3a2b4d8d4a6936b544eb1b8cbfdf112b217c346b03e48fe2b860fe",
+        "triangles": 18000,
+        "extensions": []
+      },
+      "maximumTextureDimension": 512
+    }
+  ]
+}

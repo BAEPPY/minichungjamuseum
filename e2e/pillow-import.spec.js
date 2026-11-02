@@ -9,7 +9,7 @@ test('a local pillow model overrides the hybrid viewer and removal restores orig
  // this test does not claim that importing it creates a measured original scan.
  const fixture=await readFile(new URL('../public/models/celadon-pillow-reconstruction.glb',import.meta.url));
  const fileName='pillow-local-model-fixture.glb';
- await seedCompletedComparison(page,{position:{x:4,z:2.8,inside:true},avatarName:'베개 자료 탐험가'});
+ await seedCompletedComparison(page,{destination:'pillow',avatarName:'베개 자료 탐험가'});
  await page.goto('/');
  await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});
  await expect(page.locator('#nearName')).toHaveText('청자 상감 모란·구름·학무늬 베개');

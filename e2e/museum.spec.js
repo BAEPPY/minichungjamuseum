@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
-import {readFile} from 'node:fs/promises';
-import {seedCompletedComparison,moveToCourseDestination as destination} from './helpers/course.js';
+import {readFile,writeFile} from 'node:fs/promises';
+import {seedCompletedComparison,waitForMapSettled,moveToCourseDestination as destination} from './helpers/course.js';
 
 test.setTimeout(300000);
 const comparisonNames={
@@ -57,7 +57,7 @@ async function enter(page){
  await destination(page,'entrance','박물관 입장');
  await page.locator('#interactButton').click();
  await page.locator('#enterGame').click();
- await expect(page.locator('#locationName')).toContainText('비교관');
+ await expect(page.locator('#locationName')).toContainText('비교와 탐구');
 }
 async function openObservation(page,id,name){
  await destination(page,id,name);
@@ -79,6 +79,14 @@ test('full-screen world: compare three actual vases, record five celadons, publi
  const errors=[],museumRequests=[];page.on('pageerror',error=>errors.push(error.message));
  page.on('request',request=>{const url=new URL(request.url());if(url.hostname==='museum.go.kr'||url.hostname.endsWith('.museum.go.kr'))museumRequests.push(request.url());});
  await enter(page);
+ // Separate cold shader/model preparation from a settled map timing sample.
+ await waitForMapSettled(page);
+ const warmMap=await page.locator('#gameWorld > canvas').evaluate(canvas=>new Promise(resolve=>{
+  const before=canvas.getWorldDiagnostics(),intervals=[];let previous=performance.now(),start=previous;
+  function sample(now){intervals.push(now-previous);previous=now;if(now-start<4000){requestAnimationFrame(sample);return;}const sorted=[...intervals].sort((a,b)=>a-b);resolve({environment:'Chromium SwiftShader, one browser; visible map models loaded',before,after:canvas.getWorldDiagnostics(),frames:intervals.length,durationMs:now-start,medianMs:sorted[Math.floor(sorted.length*.5)],p95Ms:sorted[Math.floor(sorted.length*.95)],maxMs:sorted.at(-1)});}requestAnimationFrame(sample);
+ }));
+ await writeFile('/workspace/game-map-warm-performance.json',JSON.stringify(warmMap,null,2));
+ await page.screenshot({path:'/workspace/game-course-entrance-map.png'});
  await expect(page.locator('video,iframe')).toHaveCount(0);
  await expect(page.locator('#videoDialog,[data-destination="video"]')).toHaveCount(0);
  // Seeing a later gallery object cannot bypass the comparison worksheet.
@@ -147,8 +155,27 @@ test('full-screen world: compare three actual vases, record five celadons, publi
    await expect(page.locator('#gameToast')).toContainText('나머지 청자');
   }else await closeObservation(page);
  }
+ // The final worksheet belongs only at the desk, even after all five notes.
+ await expect(page.locator('#reportDialog')).not.toBeVisible();
+ await destination(page,'desk','관람 보고서 작성');
+ await page.locator('#interactButton').click();
  await expect(page.locator('#reportDialog')).toBeVisible();
  await expect(page.locator('#visitProgress')).toHaveText('청자 5/5 · 기록 5/5');
+ const deskPosition=await page.evaluate(async()=>{const {get}=await import('/src/storage.js');return (await get('game-progress')).position;});
+ await page.locator('#reportDialog [data-comparison-field="evidence"]').fill('');
+ await expect(page.locator('#makingProgress')).not.toHaveClass(/done/);
+ await page.locator('#reportGalleryRecords [data-observe-again="incense"]').click();
+ await expect(page.locator('#observationDialog')).toBeVisible();
+ await expect(page.locator('#takePhoto')).toBeEnabled({timeout:45000});
+ await expect(page.locator('#objectName')).toHaveText(galleryNames.incense);
+ await expect(page.locator('#observationNote')).toHaveValue(galleryFeatures.incense);
+ await expect(page.locator('#chooseForReport')).toHaveText(/보고서로 돌아가기/);
+ await page.locator('#chooseForReport').click();
+ await expect(page.locator('#reportDialog')).toBeVisible();
+ expect(await page.evaluate(async()=>{const {get}=await import('/src/storage.js');return (await get('game-progress')).position;})).toEqual(deskPosition);
+ await expect(page.locator('#reportDialog [data-comparison-field="evidence"]')).toHaveValue('');
+ await page.locator('#reportDialog [data-comparison-field="evidence"]').fill(evidence);
+ await expect(page.locator('#makingProgress')).toHaveClass(/done/);
  for(const [id,note] of Object.entries(galleryFeatures))await expect(page.locator(`#reportGalleryRecords [data-gallery-note="${id}"]`)).toHaveValue(note);
  await expect(page.locator('#reportDialog [data-comparison-field="excellence"]')).toHaveValue(excellence);
  await expect(page.locator('#reportDialog [data-comparison-field="evidence"]')).toHaveValue(evidence);
@@ -177,11 +204,11 @@ test('full-screen world: compare three actual vases, record five celadons, publi
  expect(ready.report.photos).toHaveLength(3);
  expect(ready.published).toBe(false);
 
- await destination(page,'exit','관람을 마치고 나가기');
+ await destination(page,'exit','관람을 마치고 전시실로');
  await page.locator('#interactButton').click();
  await expect(page.locator('#exitGame')).toBeEnabled();
  await page.locator('#exitGame').click();
- await expect(page.locator('#locationName')).toContainText('전시 마당');
+ await expect(page.locator('#locationName')).toContainText('발견 전시실');
  await expect(page.locator('#nearName')).toHaveText('내 보고서 전시하기');
  await page.locator('#interactButton').click();
  await expect(page.locator('#publishReady')).toBeEnabled();
@@ -205,7 +232,7 @@ test('full-screen world: compare three actual vases, record five celadons, publi
 test('world movement, location and notes restore after reload with a completed-comparison fixture',async({page})=>{
  // The comparison phase is a stored-progress fixture only for this isolated
  // persistence test. The complete real-data course is exercised above.
- await seedCompletedComparison(page,{position:{x:4,z:-1.7,inside:true},avatarName:'기록 탐험가'});
+ await seedCompletedComparison(page,{destination:'incense',avatarName:'기록 탐험가'});
  await page.goto('/');
  await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});
  await expect(page.locator('#nearName')).toHaveText(galleryNames.incense);
@@ -260,7 +287,7 @@ test('STORED-RECORD plumbing fixture combines eight notes and toy JPEGs into one
  const reason='STORED-RECORD 시험 · 세 점의 기록을 비교하여 정리한 근거';
  const title='저장 기록으로 정리한 단 하나의 보고서';
  const entries=Object.fromEntries(Object.entries({...comparisonNotes,...galleryNotes}).map(([id,features])=>[id,{features}]));
- await seedCompletedComparison(page,{position:{x:0,z:-10.3,inside:true},avatarName:'기록 시험 탐험가',galleryReady:true,entries});
+ await seedCompletedComparison(page,{destination:'desk',avatarName:'기록 시험 탐험가',galleryReady:true,entries});
  const toyPhotos=await page.evaluate(async({thought,reason,title})=>{
   const {get,put}=await import('/src/storage.js');
   const colors=['#c34942','#436cb8','#4b8e65','#d2ad39'];
@@ -309,11 +336,11 @@ test('STORED-RECORD plumbing fixture combines eight notes and toy JPEGs into one
  expect(ready.published).toBe(false);
  expect(await reports(page)).toHaveLength(0);
 
- await destination(page,'exit','관람을 마치고 나가기');
+ await destination(page,'exit','관람을 마치고 전시실로');
  await page.locator('#interactButton').click();
  await expect(page.locator('#exitGame')).toBeEnabled();
  await page.locator('#exitGame').click();
- await expect(page.locator('#locationName')).toContainText('전시 마당');
+ await expect(page.locator('#locationName')).toContainText('발견 전시실');
  await expect(page.locator('#nearName')).toHaveText('내 보고서 전시하기');
  await page.locator('#interactButton').click();
  await expect(page.locator('#publishReady')).toBeEnabled();

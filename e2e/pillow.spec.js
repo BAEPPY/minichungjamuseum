@@ -1,12 +1,12 @@
 import {test,expect} from '@playwright/test';
-import {seedCompletedComparison} from './helpers/course.js';
+import {seedCompletedComparison,openReportAtDesk,moveToCourseDestination} from './helpers/course.js';
 
 test('pillow reconstruction rotates freely and original photographs remain available for reports',async({page})=>{
  test.setTimeout(180000);
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.setViewportSize({width:1440,height:960});
  // Start at the real pillow, without substituting a locally uploaded model.
- await seedCompletedComparison(page,{position:{x:4,z:2.8,inside:true},avatarName:'베개 탐험가',galleryReady:true});
+ await seedCompletedComparison(page,{destination:'pillow',avatarName:'베개 탐험가',galleryReady:true});
  await page.goto('/');
  await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});
  await expect(page.locator('#nearName')).toHaveText('청자 상감 모란·구름·학무늬 베개');
@@ -78,13 +78,13 @@ test('pillow reconstruction rotates freely and original photographs remain avail
  await page.locator('#observationNote').fill(note);
  await expect(page.locator('#noteStatus')).toContainText('저장했어요');
  await page.screenshot({path:'/workspace/game-pillow-photos.png'});
- await page.locator('#chooseForReport').click();
- await expect(page.locator('#reportDialog')).toBeVisible();
+ await openReportAtDesk(page);
  await expect(page.locator('#reportForm [name="artifactId"]')).toHaveValue('pillow');
  await expect(page.locator('#reportForm [data-gallery-note="pillow"]')).toHaveValue(note);
  await expect(page.locator('#reportPhotos img')).toHaveCount(2);
  expect(await page.locator('#reportPhotos img').nth(1).getAttribute('src')).toBe(originalPhoto);
  await page.locator('#reportDialog [data-close]').click();
+ await moveToCourseDestination(page,'pillow');
 
  await page.reload();
  await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});

@@ -9,7 +9,7 @@ test('a native GLB survives reload, a bad replacement preserves it, and removal 
  // and is never added to the application's default collection by this test.
  const fixture=await readFile(new URL('../public/models/celadon-incense.glb',import.meta.url));
  const fileName='native-upload-fixture.glb';
- await seedCompletedComparison(page,{position:{x:8,z:2.8,inside:true},avatarName:'원본 자료 탐험가',visited:['stool','ewer'],progressOverrides:{collectionVersion:null}});
+ await seedCompletedComparison(page,{destination:'stool',avatarName:'원본 자료 탐험가',visited:['stool','ewer'],progressOverrides:{collectionVersion:null}});
  await page.goto('/');
  await expect(page.locator('#gameLoading')).toHaveCount(0,{timeout:45000});
  await expect(page.locator('#nearName')).toHaveText('청자 투각 의자');

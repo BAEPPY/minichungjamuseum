@@ -159,6 +159,10 @@ test('a course report survives the shared POST, Redis record and GET response',a
    if(command==='LPUSH'){index.unshift(args[1]);result=index.length;}
    if(command==='LRANGE')result=index.slice(Number(args[1]),Number(args[2])+1);
    if(command==='MGET')result=args.map(key=>records.get(key)||null);
+   if(command==='EVAL'){
+    const [_script,count,...values]=args,keys=values.slice(0,count),[id,report,summary]=values.slice(count);
+    if(!records.has(keys[1])){records.set(keys[1],report);records.set(keys[2],summary);index.unshift(id);result=1;}else result=0;
+   }
    return {ok:true,json:async()=>({result})};
   });
   let res=response();

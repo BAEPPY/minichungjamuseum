@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+"""Re-encode existing map PNGs without resizing or changing sprite geometry.
+
+Requires Pillow with libwebp. Originals remain unchanged. Avatar sheets are
+lossless because the clothing recolor mask depends on their exact RGB values;
+other map illustrations use quality-94 RGB and lossless alpha.
+"""
+import argparse
+import hashlib
+import json
+import math
+from pathlib import Path
+
+import PIL
+from PIL import Image, ImageChops, ImageStat, features
+
+SOURCES = (
+    'museum-building.png', 'museum-gate.png', 'stone-tile.png',
+    'wood-tile.png', 'gallery-wall.png', 'props/display-case.png',
+    'props/tree.png', 'props/flower-planter.png', 'props/bench.png',
+    'props/writing-desk.png', 'props/report-frame.png',
+    'sprites/avatar-short.png', 'sprites/avatar-bob.png',
+)
+
+ART_KEYS = ('building', 'gate', 'stone', 'wood', 'wall', 'case', 'tree', 'flowers', 'bench', 'desk', 'frame', 'short', 'bob')
+
+def sha256(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def encode(source_root, output_root, bounds_path, verify_existing=False):
+    if not features.check('webp'):
+        raise RuntimeError('Pillow must include libwebp support')
+    output_root.mkdir(parents=True, exist_ok=True)
+    records = []
+    alpha_bounds = {}
+    for key, relative in zip(ART_KEYS, SOURCES):
+        source = source_root / relative
+        destination = output_root / (Path(relative).stem + '.webp')
+        original_hash = sha256(source)
+        avatar = relative.startswith('sprites/')
+        with Image.open(source) as opened:
+            original = opened.convert('RGBA')
+        if not verify_existing:
+            original.save(destination, 'WEBP', lossless=avatar,
+                          quality=100 if avatar else 94, method=6,
+                          alpha_quality=100, exact=True)
+        with Image.open(destination) as opened:
+            decoded = opened.convert('RGBA')
+        box = original.getchannel('A').point(lambda alpha: 255 if alpha > 18 else 0).getbbox()
+        if box is None:
+            box = (0, 0, original.width, original.height)
+        alpha_bounds[key] = {'x': box[0], 'y': box[1], 'w': box[2] - box[0], 'h': box[3] - box[1]}
+        if decoded.size != original.size:
+            raise ValueError(f'Dimensions changed: {relative}')
+        alpha_equal = ImageChops.difference(
+            original.getchannel('A'), decoded.getchannel('A')).getbbox() is None
+        if not alpha_equal:
+            raise ValueError(f'Alpha mask changed: {relative}')
+        rgb_difference = ImageChops.difference(original.convert('RGB'), decoded.convert('RGB'))
+        # Measure RGB fidelity only where source alpha is nonzero; transparent RGB is not drawn.
+        errors = ImageStat.Stat(rgb_difference, mask=original.getchannel('A'))
+        mean_error = sum(errors.mean) / 3
+        mean_squared_error = sum(v * v for v in errors.rms) / 3
+        rgb_psnr = 10 * math.log10(255 * 255 / mean_squared_error) if mean_squared_error else None
+        exact_rgba = original.tobytes() == decoded.tobytes()
+        if avatar and not exact_rgba:
+            raise ValueError(f'Avatar pixels changed: {relative}')
+        if sha256(source) != original_hash:
+            raise ValueError(f'Original was modified: {relative}')
+        records.append({
+            'key': key,
+            'source': f'/art/{relative}',
+            'output': f'/art/map/{destination.name}',
+            'width': original.width, 'height': original.height,
+            'sourceBytes': source.stat().st_size,
+            'outputBytes': destination.stat().st_size,
+            'sourceSha256': original_hash,
+            'outputSha256': sha256(destination),
+            'encoding': 'lossless RGBA' if avatar else 'quality 94 RGB, lossless alpha',
+            'alphaBoundsThreshold18': alpha_bounds[key],
+            'alphaByteIdentical': alpha_equal,
+            'rgbaByteIdentical': exact_rgba,
+            'visibleMeanAbsoluteRgbError': round(mean_error, 6),
+            'visibleRgbPsnrDb': round(rgb_psnr, 6) if rgb_psnr is not None else None,
+        })
+    source_bytes = sum(record['sourceBytes'] for record in records)
+    output_bytes = sum(record['outputBytes'] for record in records)
+    manifest = {
+        'purpose': 'Map delivery optimization only; no resize, redraw, recoloring or sprite-marker changes.',
+        'originalsUnmodified': True,
+        'script': 'scripts/build_map_art.py',
+        'encoder': {'pillow': PIL.__version__, 'libwebp': features.version('webp')},
+        'sourceBytes': source_bytes,
+        'outputBytes': output_bytes,
+        'transferReductionPercent': round((1 - output_bytes / source_bytes) * 100, 3),
+        'files': records,
+    }
+    (output_root / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+    bounds_path.parent.mkdir(parents=True, exist_ok=True)
+    bounds_path.write_text('// Generated by scripts/build_map_art.py; source alpha > 18, preserved exactly in map WebP.\nexport default ' + json.dumps(alpha_bounds, indent=2) + ';\n')
+    print(json.dumps({key: manifest[key] for key in ('sourceBytes', 'outputBytes', 'transferReductionPercent')}, indent=2))
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--source', type=Path, default=Path('public/art'))
+    parser.add_argument('--output', type=Path, default=Path('public/art/map'))
+    parser.add_argument('--bounds', type=Path, default=Path('src/map-art-bounds.js'))
+    parser.add_argument('--verify-existing', action='store_true', help='Verify existing WebP files and regenerate metadata without encoding')
+    args = parser.parse_args()
+    encode(args.source, args.output, args.bounds, args.verify_existing)
